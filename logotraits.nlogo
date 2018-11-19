@@ -16,6 +16,7 @@ globals[
   mean-energy-generalists ; mean energy of generalists
   nr-generalists          ; # of generalists
   nr-specialists          ; # of specialists
+
   nr-specialists/total    ; ratio between specialists and total
   energy-specialists      ; total energy in specialists
   energy-generalists      ; total energy in generalists
