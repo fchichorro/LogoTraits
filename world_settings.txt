@@ -1,0 +1,11 @@
+###Size of the world
+min ycor
+-30
+max ycor
+30
+min xcor
+-30
+max ycor
+30
+patch_size
+10

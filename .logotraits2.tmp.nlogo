@@ -1,88 +1,212 @@
+extensions[ csv ]
+
 globals[
   ;Patches
   ;
   ;set-resource-regen
   ;set-resource-amount
 
+  ; patch generation:
+  ; num-of-seeds-per-type
+  ; num-of-patch-types
+    patch-palette                  ; the colours of the patches
 
+  ; POPULATION LEVEL PARAMETERS
+  n1
+  males-per-female
 
-  ; turtle starting parameters
-  ;
-  ; pop-1
-  ; pop-2
-  ; starting-energy-1
-  ; starting-energy-2
-  ;starting-age-1
-  ;starting-age-2
-  ;starting-climate
+  ; FOCAL TRAITS
+  body-size-max
+  body-size-min
+  interbirth-interval-max
+  interbirth-interval-min
+  fecundity-max
+  fecundity-min
+  maturity-age-max
+  maturity-age-min
+  habitat-spec-max
+  habitat-spec-min
+  sexual?-max
+  sexual?-min
+  disp-ability-max
+  disp-ability-min
+  disp-stage-max
+  disp-stage-min
+  climate-optimum-max
+  climate-optimum-min
+  climate-sd-max
+  climate-sd-min
 
-
-  ; turtle traits
-  ;
-  ;body-size-1
-  ;body-size-2
-  ;fecundity-1
-  ;fecundity-2
-  ;gen-len-1
-  ;gen-len-2
-  ;egg-size-1
-  ;egg-size-2
-  ;sexual?-1
-  ;sexual?-2
-  ;female?-1
-  ;female?-2
-  ;resource-efficiency-1
-  ;resource-efficiency-2
-  ;optimal-climate-1
-  ;optimal-climate-2
-  ;climate-std-1
-  ;climate-std-2
-  ;dispersal-ability-1
-  ;dispersal-ability-2
-  ;juvenile-dispersal?-1
-  ;juvenile-dispersal?-2
-  ;adult-dispersal?-1
-  ;adult-dispersal?-2
-
-
+  ; NON-FOCAL TRAITS
+  starting-energy-max
+  starting-energy-min
+  starting-age-max
+  starting-age-min
+  basal-dispersal-cost-per-unit-max
+  basal-dispersal-cost-per-unit-min
+  basal-growth-cost-per-tick-max
+  basal-growth-cost-per-tick-min
+  basal-homeostasis-cost-per-tick-max
+  basal-homeostasis-cost-per-tick-min
 
 ]
-
-
-
-
 
 turtles-own[
-  age                     ;age of agent
-  energy                  ;energy of agent
+  ; FOCAL TRAITS
+  body-size
+  interbirth-interval
+  fecundity
+  maturity-age
+  habitat-spec
+  sexual?
+  disp-ability
+  disp-stage
+  climate-optimum
+  climate-sd
 
-
-
-  body-size               ; max energy of species
-  fecundity               ; number of offspring per reproductive event
-  interbirth-interval     ; number of ticks before next reproductive event
-  egg-size                ;
-  gen-len                 ; maturity age in ticks
-  sexual?                 ; whether it is a sexual organism or not
-  female?                 ; whether is female or not
-  resource-efficiency     ;
-  optimal-climate         ;
-  climate-std             ;
-
-  dispersal-ability       ;
-
-  adult-dispersal?        ; whether it moves as an adult
-  juvenile-dispersal?     ; whether it moves as a juvenile
+  ; NON-FOCAL TRAITS
+  energy
+  age
+  basal-dispersal-cost-per-unit
+  basal-growth-cost-per-tick
+  basal-homeostasis-cost-per-tick
 ]
 
-
 patches-own[
-
   resource-type
   resource-amount
   resource-regen
 
 ]
+
+breed [organisms1 organism1]
+breed [organisms2 organism2]
+
+; Import from files
+to import-organism-parameters [ filename ]
+  file-open filename
+
+  ; POPULATION LEVEL PARAMETERS
+  repeat 2 [ show file-read-line ]
+  set n1 read-from-string file-read-line
+  show file-read-line
+  set males-per-female read-from-string file-read-line
+  repeat 3 [ show file-read-line ]
+
+  ; FOCAL TRAITS
+  show file-read-line
+  set body-size-min read-from-string file-read-line
+  set body-size-max read-from-string file-read-line
+  show file-read-line
+  set interbirth-interval-min read-from-string file-read-line
+  set interbirth-interval-max read-from-string file-read-line
+  show file-read-line
+  set fecundity-min read-from-string file-read-line
+  set fecundity-max read-from-string file-read-line
+  show file-read-line
+  set maturity-age-min read-from-string file-read-line
+  set maturity-age-max read-from-string file-read-line
+  show file-read-line
+  set habitat-spec-min csv:from-row file-read-line
+  set habitat-spec-max csv:from-row file-read-line
+  show file-read-line
+  set sexual?-min read-from-string file-read-line
+  set sexual?-max read-from-string file-read-line
+  show file-read-line
+  set disp-ability-min read-from-string file-read-line
+  set disp-ability-max read-from-string file-read-line
+  show file-read-line
+  set disp-stage-min csv:from-row file-read-line
+  set disp-stage-max csv:from-row file-read-line
+  show file-read-line
+  set climate-optimum-min read-from-string file-read-line
+  set climate-optimum-max read-from-string file-read-line
+  show file-read-line
+  set climate-sd-min read-from-string file-read-line
+  set climate-sd-max read-from-string file-read-line
+  repeat 3 [ show file-read-line ]
+
+  ; NON-FOCAL TRAITS
+  show file-read-line
+  set starting-energy-min read-from-string file-read-line
+  set starting-energy-max read-from-string file-read-line
+  show file-read-line
+  set starting-age-min read-from-string file-read-line
+  set starting-age-max read-from-string file-read-line
+  show file-read-line
+  set basal-dispersal-cost-per-unit-min read-from-string file-read-line
+  set basal-dispersal-cost-per-unit-max read-from-string file-read-line
+  show file-read-line
+  set basal-growth-cost-per-tick-min read-from-string file-read-line
+  set basal-growth-cost-per-tick-max read-from-string file-read-line
+  show file-read-line
+  set basal-homeostasis-cost-per-tick-min read-from-string file-read-line
+  set basal-homeostasis-cost-per-tick-max read-from-string file-read-line
+
+  file-close
+end
+
+
+
+
+to setup
+  clear-all
+  generate-landscape-of-patch-types
+  import-organism-parameters "organism1.txt"
+  ;create organisms1
+  create-organisms1 n1
+  [
+
+    ; FOCAL TRAITS
+    set xcor random-xcor
+    set ycor random-ycor
+    set body-size one-of (range body-size-min ( body-size-max + 1 ))
+    set interbirth-interval one-of ( range interbirth-interval-min ( interbirth-interval-max + 1 ))
+    set fecundity one-of (range fecundity-min ( fecundity-max + 1 ))
+    set maturity-age one-of (range maturity-age-min ( maturity-age-max + 1 ))
+    set habitat-spec one-of list habitat-spec-min habitat-spec-max
+    set sexual? one-of list sexual?-min sexual?-max
+    set disp-ability one-of (range disp-ability-min ( disp-ability-max + 1 ))
+    set disp-stage one-of list disp-stage-min disp-
+    set climate-optimum one-of (range (climate-optimum-min * 100) (climate-optimum-max  * 100 + 1) ) / 100
+    set climate-sd one-of (range (climate-sd-min * 100) (climate-sd-max  * 100 + 1) ) / 100
+
+    ; NON-FOCAL TRAITS
+    set energy one-of (range starting-energy-min ( starting-energy-max + 1 ))
+    set age one-of (range starting-age-min (starting-age-max + 1 ))
+    set basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 ))
+    set basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 ))
+    set basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 ))
+  ]
+
+end
+
+
+
+to generate-landscape-of-patch-types
+  set patch-palette [brown green yellow orange blue red magenta violet lime]
+  let i 1
+  while [i <= num-of-patch-types]
+  [
+    ask n-of num-of-seeds-per-type patches with [pcolor = 0]
+    [
+      set pcolor item i patch-palette
+    ]
+    set i (i + 1)
+  ]
+
+  while [any? patches with [pcolor = 0]]
+  [
+    ask patches with [pcolor = 0]
+    [
+      let n neighbors with [pcolor != 0]
+      if any? n
+      [
+        set pcolor [pcolor] of one-of n
+      ]
+    ]
+  ]
+end
 
 
 to agents-setup
@@ -98,13 +222,13 @@ to create-offspring
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-1054
-144
-1667
-758
+557
+338
+895
+677
 -1
 -1
-18.333333333333332
+10.0
 1
 10
 1
@@ -153,7 +277,7 @@ body-size-1
 body-size-1
 0
 100
-50.0
+4.0
 1
 1
 NIL
@@ -168,7 +292,7 @@ body-size-2
 body-size-2
 0
 100
-50.0
+0.0
 1
 1
 NIL
@@ -457,10 +581,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-612
-52
-784
-85
+564
+137
+736
+170
 set-resource-regen
 set-resource-regen
 0
@@ -472,25 +596,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-611
-84
-783
-117
+563
+169
+735
+202
 set-resource-amount
 set-resource-amount
 0
 100
-50.0
+49.0
 1
 1
 NIL
 HORIZONTAL
 
 TEXTBOX
-632
-32
-782
-50
+584
+117
+734
+135
 Patches
 11
 0.0
@@ -562,7 +686,7 @@ starting-energy-2
 starting-energy-2
 0
 100
-50.0
+42.0
 1
 1
 NIL
@@ -597,6 +721,80 @@ starting-age-2
 1
 NIL
 HORIZONTAL
+
+TEXTBOX
+576
+226
+726
+244
+Patch initialization
+11
+0.0
+1
+
+SLIDER
+571
+249
+743
+282
+num-of-patch-types
+num-of-patch-types
+1
+4
+2.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+569
+285
+748
+318
+num-of-seeds-per-type
+num-of-seeds-per-type
+1
+444
+1.0
+10
+1
+NIL
+HORIZONTAL
+
+BUTTON
+894
+257
+957
+290
+NIL
+setup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+775
+271
+841
+304
+import
+import-organism-parameters \"organism1.txt\"
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -940,7 +1138,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
