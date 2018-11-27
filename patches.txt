@@ -1,0 +1,11 @@
+###PATCH TRAITS###
+starting resources
+10
+10
+max resources
+20
+20
+resource_regen
+10
+10
+###

@@ -7,8 +7,8 @@ males_per_female (if sexual? = True only)
 
 ###FOCAL TRAITS###
 body size
-100
-120
+200
+300
 interbirth_interval
 40
 50
@@ -54,13 +54,5 @@ basal_growth_cost_per_tick
 basal_homeostasis_cost_per_tick
 1
 1
-basal_resource_intake
-10
-10
-energy to reproduce (body size ratio)
-0.67
-0.67
-min_energy_after_reproduction (ratio)
-0.33
-0.33
 ###
+

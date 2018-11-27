@@ -1,16 +1,22 @@
 extensions[ csv ]
 
 globals[
-  ;Patches
-  ;
-  ;set-resource-regen
-  ;set-resource-amount
-
-  ; patch generation:
+  ; LANDSCAPE GENERATION
   ; num-of-seeds-per-type
   ; num-of-patch-types
     patch-palette                  ; the colours of the patches
 
+  ; PATCHES
+  ; PATCHES PARAMETERS
+  ;
+  starting-resources-min
+  starting-resources-max
+  resource-regen-min
+  resource-regen-max
+  max-resources-min
+  max-resources-max
+
+  ; ORGANISMS
   ; POPULATION LEVEL PARAMETERS
   n1
   males-per-female
@@ -48,7 +54,12 @@ globals[
   basal-growth-cost-per-tick-min
   basal-homeostasis-cost-per-tick-max
   basal-homeostasis-cost-per-tick-min
-
+  basal-resource-intake-max
+  basal-resource-intake-min
+  ratio-energy-to-reproduce-min
+  ratio-energy-to-reproduce-max
+  ratio-min-energy-after-reprod-min
+  ratio-min-energy-after-reprod-max
 ]
 
 turtles-own[
@@ -70,11 +81,15 @@ turtles-own[
   basal-dispersal-cost-per-unit
   basal-growth-cost-per-tick
   basal-homeostasis-cost-per-tick
+  basal-resource-intake
+  energy-to-reproduce
+  min-energy-after-reprod
 ]
 
 patches-own[
   resource-type
-  resource-amount
+  resources
+  max-resources
   resource-regen
 
 ]
@@ -142,16 +157,48 @@ to import-organism-parameters [ filename ]
   show file-read-line
   set basal-homeostasis-cost-per-tick-min read-from-string file-read-line
   set basal-homeostasis-cost-per-tick-max read-from-string file-read-line
+  show file-read-line
+  set basal-resource-intake-min read-from-string file-read-line
+  set basal-resource-intake-max read-from-string file-read-line
+  show file-read-line
+  set ratio-energy-to-reproduce-min read-from-string file-read-line
+  set ratio-energy-to-reproduce-max read-from-string file-read-line
+  show file-read-line
+  set ratio-min-energy-after-reprod-min read-from-string file-read-line
+  set ratio-min-energy-after-reprod-max read-from-string file-read-line
 
   file-close
 end
 
-
+; Import from files
+to import-patch-parameters
+  file-open "patches.txt"
+  repeat 2 [ show file-read-line ]
+  set starting-resources-min read-from-string file-read-line
+  set starting-resources-max read-from-string file-read-line
+  show file-read-line
+  set max-resources-min read-from-string file-read-line
+  set max-resources-max read-from-string file-read-line
+  show file-read-line
+  set resource-regen-min read-from-string file-read-line
+  set resource-regen-max read-from-string file-read-line
+  file-close
+end
 
 
 to setup
   clear-all
+  reset-ticks
   generate-landscape-of-patch-types
+  import-patch-parameters
+  ;initialize patches
+  ask patches [
+    set resources one-of (range starting-resources-min ( starting-resources-max + 1 ))
+    set max-resources one-of (range max-resources-min ( max-resources-max + 1 ))
+    set resource-regen one-of (range resource-regen-min ( resource-regen-max + 1 ))
+  ]
+
+
   import-organism-parameters "organism1.txt"
   ;create organisms1
   create-organisms1 n1
@@ -177,20 +224,23 @@ to setup
     set basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 ))
     set basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 ))
     set basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 ))
+    set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 ))
+    set energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * body-size
+    set min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * body-size
   ]
 
 end
 
 
-
 to generate-landscape-of-patch-types
-  set patch-palette [brown green yellow orange blue red magenta violet lime]
+  set patch-palette [green yellow orange blue red magenta violet lime brown]
   let i 1
   while [i <= num-of-patch-types]
   [
     ask n-of num-of-seeds-per-type patches with [pcolor = 0]
     [
-      set pcolor item i patch-palette
+      set pcolor item (i - 1) patch-palette
+      set resource-type (i - 1)
     ]
     set i (i + 1)
   ]
@@ -202,16 +252,87 @@ to generate-landscape-of-patch-types
       let n neighbors with [pcolor != 0]
       if any? n
       [
-        set pcolor [pcolor] of one-of n
+        let rand-patch one-of n
+        set pcolor [pcolor] of rand-patch
+        set resource-type [resource-type] of rand-patch
       ]
     ]
   ]
 end
 
+to go
+  agents-go
+  patches-go
+  tick
+end
 
-to agents-setup
+to patches-go
+  ask patches [
+    regen-resources
+  ]
+end
 
 
+to regen-resources
+  if resources < max-resources
+  [
+    set resources resources + resource-regen
+  ]
+end
+
+to agents-go
+  ask turtles [
+    eat
+    if energy > energy-to-reproduce [
+      reproduce
+    ]
+    disperse
+    set age age + 1
+    set energy energy - basal-homeostasis-cost-per-tick
+    if energy < 0 [die]
+  ]
+end
+
+
+to eat
+  ; Eats whatever is under the agent.
+  ;
+  let energy-income 0
+  ask patch-here [
+    ifelse resources > [basal-resource-intake] of myself
+    [
+      ;multiply basal-resource intake by the habitat spec value
+      set energy-income [basal-resource-intake] of myself *
+      item resource-type [habitat-spec] of myself
+      set resources resources - [basal-resource-intake] of myself
+
+    ]
+    [
+      set energy-income ([basal-resource-intake] of myself +
+      (resources - [basal-resource-intake] of myself) ) *
+      item resource-type [habitat-spec] of myself
+      set resources 0
+    ]
+  ]
+  set energy energy + energy-income
+end
+
+to disperse
+  repeat disp-ability [
+    set heading random 360
+    fd 1
+  ]
+  set energy energy - basal-dispersal-cost-per-unit
+end
+
+to reproduce
+  let energy_to_offspring energy - min-energy-after-reprod
+  repeat fecundity
+  [
+    hatch 1 [
+      set energy (energy_to_offspring / [fecundity] of myself)
+    ]
+  ]
 end
 
 
@@ -248,338 +369,6 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
-TEXTBOX
-55
-263
-205
-281
-Organism 1 traits\n
-11
-0.0
-1
-
-TEXTBOX
-343
-258
-493
-276
-Organism 2 traits\n
-11
-0.0
-1
-
-SLIDER
-45
-285
-137
-318
-body-size-1
-body-size-1
-0
-100
-4.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-338
-284
-430
-317
-body-size-2
-body-size-2
-0
-100
-0.0
-1
-1
-NIL
-HORIZONTAL
-
-INPUTBOX
-46
-350
-135
-410
-gen-len-1
-5.0
-1
-0
-Number
-
-INPUTBOX
-337
-346
-441
-406
-gen-len-2
-8.0
-1
-0
-Number
-
-INPUTBOX
-46
-410
-140
-470
-egg-size-1
-0.0
-1
-0
-Number
-
-INPUTBOX
-337
-406
-413
-466
-egg-size-2
-8.0
-1
-0
-Number
-
-SWITCH
-46
-469
-155
-502
-sexual?-1
-sexual?-1
-1
-1
--1000
-
-SWITCH
-337
-466
-440
-499
-sexual-2
-sexual-2
-1
-1
--1000
-
-SLIDER
-46
-317
-141
-350
-fecundity-1
-fecundity-1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-336
-315
-431
-348
-fecundity-2
-fecundity-2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SWITCH
-46
-502
-156
-535
-female?-1
-female?-1
-1
-1
--1000
-
-SWITCH
-337
-498
-447
-531
-female?-2
-female?-2
-1
-1
--1000
-
-INPUTBOX
-47
-534
-161
-594
-resource-efficiency-1
-NIL
-1
-0
-String
-
-INPUTBOX
-336
-530
-448
-590
-resource-efficiency-2
-NIL
-1
-0
-String
-
-SLIDER
-49
-594
-164
-627
-optimal-climate-1
-optimal-climate-1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-336
-590
-451
-623
-optimal-climate-2
-optimal-climate-2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-51
-628
-166
-661
-climate-std-1
-climate-std-1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-337
-622
-443
-655
-climate-std-2
-climate-std-2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-55
-662
-173
-695
-dispersal-ability-1
-dispersal-ability-1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-338
-655
-456
-688
-dispersal-ability-2
-dispersal-ability-2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SWITCH
-54
-727
-208
-760
-adult-dispersal?-1
-adult-dispersal?-1
-1
-1
--1000
-
-SWITCH
-337
-726
-491
-759
-adult-dispersal?-2
-adult-dispersal?-2
-1
-1
--1000
-
-SLIDER
-338
-689
-474
-722
-juvenile-dispersal?-2
-juvenile-dispersal?-2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-53
-694
-225
-727
-juvenile-dispersal?-1
-juvenile-dispersal?-1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
 SLIDER
 564
 137
@@ -604,7 +393,7 @@ set-resource-amount
 set-resource-amount
 0
 100
-49.0
+35.0
 1
 1
 NIL
@@ -619,108 +408,6 @@ Patches
 11
 0.0
 1
-
-TEXTBOX
-53
-25
-203
-43
-Organism 1 starting conditions
-11
-0.0
-1
-
-TEXTBOX
-319
-26
-469
-44
-Organism 2 starting conditions
-11
-0.0
-1
-
-INPUTBOX
-53
-42
-164
-102
-pop-1
-0.0
-1
-0
-Number
-
-INPUTBOX
-325
-48
-427
-108
-pop-2
-0.0
-1
-0
-Number
-
-SLIDER
-52
-104
-175
-137
-starting-energy-1
-starting-energy-1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-327
-109
-451
-142
-starting-energy-2
-starting-energy-2
-0
-100
-42.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-52
-137
-167
-170
-starting-age-1
-starting-age-1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-326
-142
-438
-175
-starting-age-2
-starting-age-2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
 
 TEXTBOX
 576
@@ -795,6 +482,51 @@ NIL
 NIL
 NIL
 1
+
+BUTTON
+464
+373
+527
+406
+go
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+466
+453
+529
+486
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+387
+258
+470
+303
+NIL
+count turtles
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
