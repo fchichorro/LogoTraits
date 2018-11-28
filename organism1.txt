@@ -1,21 +1,21 @@
 ###POPULATION STARTING PARAMETERS###
 starting N
-30
+100
 males_per_female (if sexual? = True only)
 1
 ###
 
 ###FOCAL TRAITS###
-body size
-100
+body size (max amount of energy available)
+30
 120
-interbirth_interval
+interbirth_interval (ticks)
 40
 50
-fecundity
-2
-5
-maturity_age
+fecundity (number of offspring)
+1
+10
+maturity_age (in ticks)
 30
 50
 habitat_spec
@@ -39,28 +39,28 @@ climate_sd
 ###
 
 ###NON FOCAL TRAITS###
-starting_energy
-20
-30
-starting_age
+starting_energy (* body-size)
+0.3
+0.6
+starting_age (in ticks)
 1
 30
-basal_dispersal_cost_per_unit
-1
-1
-basal_growth_cost_per_tick
-1
-1
-basal_homeostasis_cost_per_tick
-1
-1
-basal_resource_intake
-10
-10
-energy to reproduce (body size ratio)
+basal_dispersal_cost_per_unit (* body-size ^ metabolic_allometric_exponent)
+0.02
+0.02
+basal_growth_cost_per_tick (* body-size ^ metabolic_allometric_exponent)
+0.02
+0.02
+basal_homeostasis_cost_per_tick (* body-size ^ metabolic_allometric_exponent)
+0.02
+0.02
+basal_resource_intake (* body-size ^ metabolic_allometric_exponent)
+0.10
+0.10
+energy to reproduce (* body-size ^ metabolic_allometric_exponent)
 0.67
 0.67
-min_energy_after_reproduction (ratio)
+min_energy_after_reproduction (* body-size ^ metabolic_allometric_exponent)
 0.33
 0.33
 ###

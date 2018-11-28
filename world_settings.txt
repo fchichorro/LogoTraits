@@ -1,11 +1,17 @@
 ###Size of the world
-min ycor
--30
-max ycor
-30
 min xcor
--30
+-16
+max xcor
+16
+min ycor
+-16
 max ycor
-30
-patch_size
+16
+patch_size (in pixels)
 10
+###
+
+###METABOLIC THEORY CONSTANTS###
+metabolic_allometric_exponent
+0.75
+###

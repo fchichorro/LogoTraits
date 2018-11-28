@@ -6,6 +6,6 @@ max resources
 20
 20
 resource_regen
-10
-10
+1
+1
 ###
