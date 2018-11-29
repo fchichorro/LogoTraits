@@ -318,9 +318,17 @@ to agents-go
     if energy < body-size [
       eat
     ]
-    if energy > energy-to-reproduce and age > maturity-age [
-      reproduce
+    ifelse age > maturity-age
+    [
+      if energy > energy-to-reproduce [
+        reproduce
+      ]
     ]
+      ;else
+    [
+      set energy energy - basal-growth-cost-per-tick
+    ]
+
     disperse
     set age age + 1
     set energy energy - basal-homeostasis-cost-per-tick
@@ -366,6 +374,7 @@ to reproduce
   [
     hatch 1 [
       set energy (energy_to_offspring / [fecundity] of myself)
+      set age 0
     ]
   ]
 end
@@ -542,10 +551,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [body-size] of turtles"
 
 PLOT
-150
-265
-350
-415
+251
+338
+451
+488
 fecundity
 NIL
 NIL
@@ -598,6 +607,60 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles"
+
+PLOT
+46
+339
+246
+489
+mean maturity-age
+NIL
+NIL
+0.0
+10.0
+20.0
+40.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [maturity-age] of turtles"
+
+PLOT
+228
+154
+428
+304
+mean dispersal ability
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [disp-ability] of turtles"
+
+PLOT
+1082
+272
+1282
+422
+mean age
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [age] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
