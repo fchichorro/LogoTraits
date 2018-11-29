@@ -315,7 +315,9 @@ end
 
 to agents-go
   ask turtles [
-    eat
+    if energy < body-size [
+      eat
+    ]
     if energy > energy-to-reproduce [
       reproduce
     ]
@@ -389,8 +391,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-0
-0
+1
+1
 1
 -16
 16
@@ -421,7 +423,7 @@ num-of-patch-types
 num-of-patch-types
 1
 4
-1.0
+2.0
 1
 1
 NIL
