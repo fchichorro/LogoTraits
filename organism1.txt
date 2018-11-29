@@ -17,7 +17,7 @@ fecundity (number of offspring)
 10
 maturity_age (in ticks)
 30
-50
+30
 habitat_spec
 1,0,0,0
 1,0,0,0

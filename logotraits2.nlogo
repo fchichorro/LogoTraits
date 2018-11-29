@@ -318,7 +318,7 @@ to agents-go
     if energy < body-size [
       eat
     ]
-    if energy > energy-to-reproduce [
+    if energy > energy-to-reproduce and age > maturity-age [
       reproduce
     ]
     disperse
