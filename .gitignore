@@ -1,5 +1,5 @@
 #files to ignore
-*.tmp.netlogo
+*.tmp.nlogo
 
 #folders to ignore
 ignore_this_folder/
