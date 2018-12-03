@@ -9,14 +9,14 @@ males_per_female (if sexual? = True only)
 body size (max amount of energy available)
 100
 100
-interbirth_interval (ticks)
-40
+interbirth_interval (ticks) #not working
+50
 50
 fecundity (number of offspring)
-2
-2
+1
+10
 maturity_age (in ticks)
-20
+40
 40
 habitat_spec
 1,0,0,0
@@ -26,7 +26,7 @@ false
 false
 disp_ability
 1
-3
+1
 disp_stage
 1,1
 1,1
@@ -57,10 +57,10 @@ basal_homeostasis_cost_per_tick (* body-size ^ metabolic_allometric_exponent)
 basal_resource_intake (* body-size ^ metabolic_allometric_exponent)
 0.10
 0.10
-energy to reproduce (* body-size ^ metabolic_allometric_exponent)
+energy to reproduce (* body-size)
 0.67
 0.67
-min_energy_after_reproduction (* body-size ^ metabolic_allometric_exponent)
+min_energy_after_reproduction (* body-size)
 0.33
 0.33
 ###

@@ -63,6 +63,9 @@ globals[
 
   ; METABOLIC THEORY CONSTANTS
   metabolic-allometric-exponent
+
+  ; in test
+  ;mortality-rate
 ]
 
 turtles-own[
@@ -255,9 +258,9 @@ to setup
     set basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
     set basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
     ;set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size)
 
     ; BODY-SIZE SCALING TRAITS (but not allometrically
+    set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size)
     set energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * body-size
     set min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * body-size
   ]
@@ -333,6 +336,8 @@ to agents-go
     set age age + 1
     set energy energy - basal-homeostasis-cost-per-tick
     if energy < 0 [die]
+    ; in test
+    if random-float 1 < mortality-rate [die]
   ]
 end
 
@@ -389,11 +394,11 @@ end
 GRAPHICS-WINDOW
 557
 338
-895
-677
+1070
+852
 -1
 -1
-10.0
+5.0
 1
 10
 1
@@ -403,10 +408,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--16
-16
--16
-16
+-50
+50
+-50
+50
 1
 1
 1
@@ -447,7 +452,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-41.0
+71.0
 10
 1
 NIL
@@ -627,10 +632,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [maturity-age] of turtles"
 
 PLOT
-228
-154
-428
-304
+127
+160
+327
+310
 mean dispersal ability
 NIL
 NIL
@@ -645,10 +650,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [disp-ability] of turtles"
 
 PLOT
-1082
-272
-1282
-422
+1029
+169
+1229
+319
 mean age
 NIL
 NIL
@@ -661,6 +666,23 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [age] of turtles"
+"max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
+"pen-2" 1.0 0 -7500403 true "" "plot min [age] of turtles"
+
+SLIDER
+1283
+502
+1455
+535
+mortality-rate
+mortality-rate
+0
+1
+0.02
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
