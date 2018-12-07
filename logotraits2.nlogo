@@ -323,7 +323,9 @@ end
 to patches-go
   ask patches [
     regen-resources
-    set pcolor scale-color base-color resources 0 (max-resources * 2)
+    if patch-color-scales-with-resources? [
+      set pcolor scale-color base-color resources -10 (max-resources * 2)
+    ]
   ]
 end
 
@@ -773,6 +775,17 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
+
+SWITCH
+665
+150
+913
+183
+patch-color-scales-with-resources?
+patch-color-scales-with-resources?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
