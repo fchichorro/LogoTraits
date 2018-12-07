@@ -323,7 +323,7 @@ end
 to patches-go
   ask patches [
     regen-resources
-    set pcolor
+    set pcolor scale-color base-color resources 0 (max-resources * 2)
   ]
 end
 
