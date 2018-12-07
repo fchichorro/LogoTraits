@@ -66,6 +66,10 @@ globals[
 
   ; in test
   ;mortality-rate
+
+  ; STATS
+  number-of-initial-lineages-remaining
+
 ]
 
 turtles-own[
@@ -90,6 +94,12 @@ turtles-own[
   basal-resource-intake
   energy-to-reproduce
   min-energy-after-reprod
+
+  tick-of-last-reprod-event
+
+  ;stats
+  lineage-identity
+
 ]
 
 patches-own[
@@ -98,6 +108,8 @@ patches-own[
   max-resources
   resource-regen
 
+  ; visualization
+  base-color
 ]
 
 breed [organisms1 organism1]
@@ -257,12 +269,15 @@ to setup
     set basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
     set basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
     set basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    ;set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+    set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
 
     ; BODY-SIZE SCALING TRAITS (but not allometrically
-    set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size)
     set energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * body-size
     set min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * body-size
+
+    ; STATS AND VISUALIZATION
+    set lineage-identity who
+    set size (body-size / 100)
   ]
 
 end
@@ -276,6 +291,7 @@ to generate-landscape-of-patch-types
     ask n-of num-of-seeds-per-type patches with [pcolor = 0]
     [
       set pcolor item (i - 1) patch-palette
+      set base-color pcolor
       set resource-type (i - 1)
     ]
     set i (i + 1)
@@ -290,6 +306,7 @@ to generate-landscape-of-patch-types
       [
         let rand-patch one-of n
         set pcolor [pcolor] of rand-patch
+        set base-color pcolor
         set resource-type [resource-type] of rand-patch
       ]
     ]
@@ -297,7 +314,8 @@ to generate-landscape-of-patch-types
 end
 
 to go
-  agents-go
+  ;agents-go
+  agents-go-bigger-first
   patches-go
   tick
 end
@@ -305,6 +323,7 @@ end
 to patches-go
   ask patches [
     regen-resources
+    set pcolor
   ]
 end
 
@@ -313,6 +332,33 @@ to regen-resources
   if resources < max-resources
   [
     set resources resources + resource-regen
+  ]
+end
+
+to agents-go-bigger-first
+  foreach sort-on [-1 * body-size + random-float 1 + random-float -1] turtles
+  [ the-turtle -> ask the-turtle [
+        if energy < body-size [
+      eat
+    ]
+    ifelse age > maturity-age
+    [
+      if energy > energy-to-reproduce [
+        reproduce
+      ]
+    ]
+      ;else
+    [
+      set energy energy - basal-growth-cost-per-tick
+    ]
+
+    disperse
+    set age age + 1
+    set energy energy - basal-homeostasis-cost-per-tick
+    if energy < 0 [die]
+    ; in test
+    if random-float 1 < mortality-rate [die]
+    ]
   ]
 end
 
@@ -381,6 +427,7 @@ to reproduce
       set energy (energy_to_offspring / [fecundity] of myself)
       set age 0
     ]
+    set tick-of-last-reprod-event ticks
   ]
 end
 
@@ -390,15 +437,22 @@ to create-offspring
 
 
 end
+
+
+
+; STATS
+to calculate-number-of-initial-lineages-remaining
+
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 557
 338
-1070
-852
+895
+677
 -1
 -1
-5.0
+10.0
 1
 10
 1
@@ -408,10 +462,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--50
-50
--50
-50
+-16
+16
+-16
+16
 1
 1
 1
@@ -452,7 +506,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-71.0
+21.0
 10
 1
 NIL
@@ -560,7 +614,7 @@ PLOT
 338
 451
 488
-fecundity
+mean fecundity
 NIL
 NIL
 0.0
@@ -670,19 +724,55 @@ PENS
 "pen-2" 1.0 0 -7500403 true "" "plot min [age] of turtles"
 
 SLIDER
-1283
-502
-1455
-535
+946
+663
+1118
+696
 mortality-rate
 mortality-rate
 0
 1
-0.02
+0.0
 0.01
 1
 NIL
 HORIZONTAL
+
+PLOT
+940
+359
+1140
+509
+histogram of initial lineages
+lineage code
+NIL
+0.0
+100.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "histogram [lineage-identity] of turtles"
+
+PLOT
+938
+511
+1138
+661
+histogram of body sizes
+body size value
+NIL
+25.0
+130.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -7,14 +7,14 @@ males_per_female (if sexual? = True only)
 
 ###FOCAL TRAITS###
 body size (max amount of energy available)
-100
-100
+30
+120
 interbirth_interval (ticks) #not working
 50
 50
 fecundity (number of offspring)
 1
-10
+1
 maturity_age (in ticks)
 40
 40
