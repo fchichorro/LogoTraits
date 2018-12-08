@@ -30,6 +30,8 @@ globals[
   fecundity-min
   maturity-age-max
   maturity-age-min
+  longevity-max
+  longevity-min
   habitat-spec-max
   habitat-spec-min
   sexual?-max
@@ -164,6 +166,9 @@ to import-organism-parameters [ filename ]
   set maturity-age-min read-from-string file-read-line
   set maturity-age-max read-from-string file-read-line
   show file-read-line
+  set longevity-min read-from-string file-read-line
+  set longevity-max read-from-string file-read-line
+  show file-read-line
   set habitat-spec-min csv:from-row file-read-line
   set habitat-spec-max csv:from-row file-read-line
   show file-read-line
@@ -248,12 +253,11 @@ to setup
   [
 
     ; FOCAL TRAITS
-    set xcor random-xcor
-    set ycor random-ycor
     set body-size one-of (range body-size-min ( body-size-max + 1 ))
     set interbirth-interval one-of ( range interbirth-interval-min ( interbirth-interval-max + 1 ))
     set fecundity one-of (range fecundity-min ( fecundity-max + 1 ))
     set maturity-age one-of (range maturity-age-min ( maturity-age-max + 1 ))
+    ;set longevity one-of (range longevity-min (longevity-max + 1))
     set habitat-spec one-of list habitat-spec-min habitat-spec-max
     set sexual? one-of list sexual?-min sexual?-max
     set disp-ability one-of (range disp-ability-min ( disp-ability-max + 1 ))
@@ -261,7 +265,9 @@ to setup
     set climate-optimum one-of (range (climate-optimum-min * 100) (climate-optimum-max  * 100 + 1) ) / 100
     set climate-sd one-of (range (climate-sd-min * 100) (climate-sd-max  * 100 + 1) ) / 100
 
-    ; INITIAL ENERGY AND AGE
+    ; INITIAL ENERGY AND AGE AND SPATIAL CORDINATES
+    set xcor random-xcor
+    set ycor random-ycor
     set energy one-of (range starting-energy-min ( starting-energy-max + 1 )) * body-size
     set age one-of (range starting-age-min (starting-age-max + 1 ))
 
@@ -360,6 +366,8 @@ to agents-go-bigger-first
     if energy < 0 [die]
     ; in test
     if random-float 1 < mortality-rate [die]
+    ;if random
+
     ]
   ]
 end
@@ -493,7 +501,7 @@ num-of-patch-types
 num-of-patch-types
 1
 4
-2.0
+1.0
 1
 1
 NIL
@@ -508,7 +516,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-21.0
+1.0
 10
 1
 NIL
@@ -718,12 +726,11 @@ NIL
 0.0
 10.0
 true
-false
+true
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [age] of turtles"
+"mean" 1.0 0 -16777216 true "" "plot mean [age] of turtles"
 "max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
-"pen-2" 1.0 0 -7500403 true "" "plot min [age] of turtles"
 
 SLIDER
 946
@@ -754,7 +761,7 @@ NIL
 10.0
 true
 false
-"" ""
+"set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
 PENS
 "default" 1.0 0 -16777216 true "" "histogram [lineage-identity] of turtles"
 
@@ -772,7 +779,7 @@ NIL
 10.0
 true
 false
-"" ""
+"set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
 PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
@@ -786,6 +793,24 @@ patch-color-scales-with-resources?
 1
 1
 -1000
+
+PLOT
+1187
+425
+1387
+575
+histogram of fecundity
+fecundity
+NIL
+1.0
+11.0
+0.0
+10.0
+true
+false
+"set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
+PENS
+"default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
