@@ -320,9 +320,12 @@ to generate-landscape-of-patch-types
 end
 
 to go
-  ;agents-go
-  agents-go-bigger-first
+  ifelse big-move-first?
+  [agents-go-bigger-first]
+  [agents-go-random]
+
   patches-go
+
   tick
 end
 
@@ -346,57 +349,47 @@ end
 to agents-go-bigger-first
   foreach sort-on [-1 * body-size + random-float 1 + random-float -1] turtles
   [ the-turtle -> ask the-turtle [
-        if energy < body-size [
-      eat
+    agents-go
     ]
-    ifelse age > maturity-age
-    [
-      if energy > energy-to-reproduce [
-        reproduce
-      ]
-    ]
-      ;else
-    [
-      set energy energy - basal-growth-cost-per-tick
-    ]
+  ]
+end
 
-    disperse
-    set age age + 1
-    set energy energy - basal-homeostasis-cost-per-tick
-    if energy < 0 [die]
-    ; in test
-    if random-float 1 < mortality-rate [die]
-    ;if random
-
-    ]
+to agents-go-random
+  ask turtles [
+    agents-go
   ]
 end
 
 to agents-go
-  ask turtles [
-    if energy < body-size [
-      eat
+  ifelse random-walk?
+  [ disperse]
+  [let energy-income get-energy-income
+    let mean-energy-incomes get-mean-energy-incomes
+    if (energy-income = 0) or (energy-income < mean-energy-incomes) [
+      disperse
     ]
-    ifelse age > maturity-age
-    [
-      if energy > energy-to-reproduce [
-        reproduce
-      ]
-    ]
-      ;else
-    [
-      set energy energy - basal-growth-cost-per-tick
-    ]
-
-    disperse
-    set age age + 1
-    set energy energy - basal-homeostasis-cost-per-tick
-    if energy < 0 [die]
-    ; in test
-    if random-float 1 < mortality-rate [die]
   ]
-end
+  if energy < body-size [
+    eat
+  ]
+  ifelse age > maturity-age
+  [
+    if energy > energy-to-reproduce [
+      reproduce
+    ]
+  ]
+  ;else
+  [
+    set energy energy - basal-growth-cost-per-tick
+  ]
 
+  set age age + 1
+  set energy energy - basal-homeostasis-cost-per-tick
+  if energy < 0 [die]
+  ; in test
+  if random-float 1 < mortality-rate [die]
+  ;if random
+end
 
 to eat
   ; Eats whatever is under the agent.
@@ -420,6 +413,74 @@ to eat
   ]
   set energy energy + energy-income
 end
+
+to-report get-mean-energy-incomes
+  ;UGLY FUNCTION
+  ;calculate the energy income of a patch
+  let mean-energy-income 0
+  let num-patches 0
+  ask [patches in-radius resource-perception-radius] of patch-here [
+    ifelse resources > [basal-resource-intake] of myself
+    [
+      ;multiply basal-resource intake by the habitat spec value
+      set mean-energy-income mean-energy-income + [basal-resource-intake] of myself *
+      item resource-type [habitat-spec] of myself
+      set num-patches num-patches + 1
+
+    ]
+    [
+      set mean-energy-income mean-energy-income + ([basal-resource-intake] of myself +
+      (resources - [basal-resource-intake] of myself) ) *
+      item resource-type [habitat-spec] of myself
+      set num-patches num-patches + 1
+    ]
+  ]
+  set mean-energy-income mean-energy-income / num-patches
+  report mean-energy-income
+end
+
+to-report get-energy-income
+  ;get energy income if agent eats in current patch
+  let energy-income 0
+  ask patch-here [
+    ifelse resources > [basal-resource-intake] of myself
+    [
+      ;multiply basal-resource intake by the habitat spec value
+      set energy-income [basal-resource-intake] of myself *
+      item resource-type [habitat-spec] of myself
+    ]
+    [
+      set energy-income ([basal-resource-intake] of myself +
+      (resources - [basal-resource-intake] of myself) ) *
+      item resource-type [habitat-spec] of myself
+    ]
+  ]
+  report energy-income
+end
+
+to eat-or-move
+  ; Eats whatever is under the agent.
+  ;
+  let energy-income 0
+  ask patch-here [
+    ifelse resources > [basal-resource-intake] of myself
+    [
+      ;multiply basal-resource intake by the habitat spec value
+      set energy-income [basal-resource-intake] of myself *
+      item resource-type [habitat-spec] of myself
+      set resources resources - [basal-resource-intake] of myself
+
+    ]
+    [
+      set energy-income ([basal-resource-intake] of myself +
+      (resources - [basal-resource-intake] of myself) ) *
+      item resource-type [habitat-spec] of myself
+      set resources 0
+    ]
+  ]
+  set energy energy + energy-income
+end
+
 
 to disperse
   repeat disp-ability [
@@ -501,7 +562,7 @@ num-of-patch-types
 num-of-patch-types
 1
 4
-1.0
+4.0
 1
 1
 NIL
@@ -516,7 +577,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-1.0
+81.0
 10
 1
 NIL
@@ -733,10 +794,10 @@ PENS
 "max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
 
 SLIDER
-946
-663
-1118
-696
+1128
+806
+1300
+839
 mortality-rate
 mortality-rate
 0
@@ -748,10 +809,10 @@ NIL
 HORIZONTAL
 
 PLOT
-940
-359
-1140
-509
+1122
+502
+1322
+652
 histogram of initial lineages
 lineage code
 NIL
@@ -766,10 +827,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [lineage-identity] of turtles"
 
 PLOT
-938
-511
-1138
-661
+1120
+654
+1320
+804
 histogram of body sizes
 body size value
 NIL
@@ -790,15 +851,15 @@ SWITCH
 183
 patch-color-scales-with-resources?
 patch-color-scales-with-resources?
-1
+0
 1
 -1000
 
 PLOT
-1187
-425
-1387
-575
+1122
+345
+1322
+495
 histogram of fecundity
 fecundity
 NIL
@@ -811,6 +872,43 @@ false
 "set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
 PENS
 "default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
+
+SLIDER
+910
+402
+1110
+435
+resource-perception-radius
+resource-perception-radius
+0
+5
+0.0
+1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+971
+449
+1110
+482
+big-move-first?
+big-move-first?
+0
+1
+-1000
+
+SWITCH
+976
+523
+1108
+556
+random-walk?
+random-walk?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1158,6 +1256,25 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="num-of-patch-types">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="patch-color-scales-with-resources?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mortality-rate">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="num-of-seeds-per-type">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
