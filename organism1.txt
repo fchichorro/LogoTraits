@@ -9,9 +9,9 @@ males_per_female (if sexual? = True only)
 body size (max amount of energy available)
 30
 120
-interbirth_interval (ticks) #not working
-50
-50
+interbirth_interval (ticks)
+10
+10
 fecundity (number of offspring)
 1
 1
@@ -42,9 +42,9 @@ climate_sd
 ###
 
 ###NON FOCAL TRAITS###
-starting_energy (* body-size)
+starting_energy (* body-size ^ metabolic_allometric_exponent)
+0.1
 0.3
-0.6
 starting_age (in ticks)
 1
 30
@@ -60,10 +60,10 @@ basal_homeostasis_cost_per_tick (* body-size ^ metabolic_allometric_exponent)
 basal_resource_intake (* body-size ^ metabolic_allometric_exponent)
 0.10
 0.10
-energy to reproduce (* body-size)
+energy to reproduce (* body-size ^ metabolic_allometric_exponent)
 0.67
 0.67
-min_energy_after_reproduction (* body-size)
+min_energy_after_reproduction (* body-size ^ metabolic_allometric_exponent)
 0.33
 0.33
 ###

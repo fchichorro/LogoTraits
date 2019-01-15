@@ -65,7 +65,7 @@ globals[
 
   ; WORLD CONSTANTS
   metabolic-allometric-exponent
-  stand-dev-to-body-size
+  body-size-advantage
 
   ; in test
   ;mortality-rate
@@ -97,7 +97,8 @@ turtles-own[
   basal-resource-intake
   energy-to-reproduce
   min-energy-after-reprod
-  ticks-since-last-reproduction
+
+  tick-of-last-reprod-event
 
   ;stats
   lineage-identity
@@ -137,7 +138,7 @@ to set-world-parameters
   show file-read-line
   set metabolic-allometric-exponent (read-from-string file-read-line)
   show file-read-line
-  set stand-dev-to-body-size (read-from-string file-read-line)
+  set body-size-advantage (read-from-string file-read-line)
   file-close
 
 end
@@ -283,7 +284,6 @@ to setup
     ; BODY-SIZE SCALING TRAITS (but not allometrically
     set energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
     set min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
 
     ; STATS AND VISUALIZATION
     set lineage-identity who
@@ -353,7 +353,7 @@ end
 
 to agents-go-bigger-first
   ;foreach sort-on [-1 * body-size + random-float 1 + random-float -1] turtles
-  foreach sort-on [-1 * random-normal body-size (((body-size-min + body-size-max) / 2) * stand-dev-to-body-size)] turtles
+  foreach sort-on [-1 * random-normal body-size (((body-size-min + body-size-max) / 2) * body-size-advantage)] turtles
   [ the-turtle -> ask the-turtle [
     agents-go
     ]
@@ -381,19 +381,14 @@ to agents-go
   ifelse age > maturity-age
   [
     if energy > energy-to-reproduce [
-      if ticks-since-last-reproduction > interbirth-interval
-      [
       reproduce
-      set ticks-since-last-reproduction -1 ; -1 because below we add +1
-      ]
-      ]
+    ]
   ]
   ;else
   [
     set energy energy - basal-growth-cost-per-tick
   ]
 
-  set ticks-since-last-reproduction ticks-since-last-reproduction + 1
   set age age + 1
   set energy energy - basal-homeostasis-cost-per-tick
   if energy < 0 [die]
@@ -494,16 +489,11 @@ end
 
 
 to disperse
-  ifelse (age < maturity-age and item 0 disp-stage = 0) or (age > maturity-age and item 1 disp-stage = 0) [
-    ;do nothing if this stage is non-disperser
+  repeat disp-ability [
+    set heading random 360
+    fd 1
   ]
-  [
-    repeat disp-ability [
-      set heading random 360
-      fd 1
-    ]
-    set energy energy - basal-dispersal-cost-per-unit
-  ]
+  set energy energy - basal-dispersal-cost-per-unit
 end
 
 to reproduce
@@ -514,6 +504,7 @@ to reproduce
       set energy (energy_to_offspring / [fecundity] of myself)
       set age 0
     ]
+    set tick-of-last-reprod-event ticks
   ]
 end
 
@@ -525,126 +516,9 @@ to create-offspring
 end
 
 
-; THREATS
 
-to degrade-habitat
-  ask one-of patches with [pcolor != 0][
-      set resources 0
-      set max-resources 0
-      set resource-regen 0
-      set pcolor 0
-    degrade-patch
-  ]
-end
-
-to degrade-patch
-  ask n-of 1 neighbors [
-    ifelse pcolor != 0 [
-
-      set resources 0
-      set max-resources 0
-      set resource-regen 0
-      set pcolor 0
-      degrade-patch
-    ]
-    [
-      stop
-    ]
-  ]
-end
-
-to exterminate-habitat
-  ask one-of patches [
-    exterminate-patch
-  ]
-end
-
-to exterminate-patch
-  ask n-of 2 neighbors [
-    ifelse count turtles-here > 0
-    [
-      watch-me
-      ask turtles-here
-      [
-        die
-      ]
-      exterminate-patch
-    ]
-    [
-      stop
-
-    ]
-  ]
-end
-
-to add-invasives
-  let allien-color white
-  let allien-body-size one-of (range body-size-min ( body-size-max + 1 ))
-  let allien-interbirth-interval one-of ( range interbirth-interval-min ( interbirth-interval-max + 1 ))
-  let allien-fecundity one-of (range fecundity-min ( fecundity-max + 1 ))
-  let allien-maturity-age one-of (range maturity-age-min ( maturity-age-max + 1 ))
-  ;set longevity one-of (range longevity-min (longevity-max + 1))
-  let allien-habitat-spec one-of list habitat-spec-min habitat-spec-max
-  let allien-sexual? one-of list sexual?-min sexual?-max
-  let allien-disp-ability one-of (range disp-ability-min ( disp-ability-max + 1 ))
-  let allien-disp-stage one-of list disp-stage-min disp-stage-max
-  let allien-climate-optimum one-of (range (climate-optimum-min * 100) (climate-optimum-max  * 100 + 1) ) / 100
-  let allien-climate-sd one-of (range (climate-sd-min * 100) (climate-sd-max  * 100 + 1) ) / 100
-
-  ; INITIAL ENERGY AND AGE AND SPATIAL CORDINATES
-  let allien-xcor random-xcor
-  let allien-ycor random-ycor
-  let allien-energy one-of (range starting-energy-min ( starting-energy-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-age one-of (range starting-age-min (starting-age-max + 1 ))
-
-  ; * BODY-SIZE ^ allometric-constant TRAITS
-  let allien-basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
- ; BODY-SIZE SCALING TRAITS (but not allometrically
-  let allien-energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
-
-
-  create-organisms1 alliens-nr
-  [
-    set color allien-color
-    ; FOCAL TRAITS
-    set body-size allien-body-size
-    set interbirth-interval allien-interbirth-interval
-    set fecundity allien-fecundity
-    set maturity-age allien-maturity-age
-    ;set longevity one-of (range longevity-min (longevity-max + 1))
-    set habitat-spec allien-habitat-spec
-    set sexual? allien-sexual?
-    set disp-ability allien-disp-ability
-    set disp-stage allien-disp-stage
-    set climate-optimum allien-climate-optimum
-    set climate-sd allien-climate-sd
-
-    ; INITIAL ENERGY AND AGE AND SPATIAL CORDINATES
-    set xcor allien-xcor
-    set ycor allien-ycor
-    set energy allien-energy
-    set age allien-age
-
-    ; * BODY-SIZE ^ allometric-constant TRAITS
-    set basal-dispersal-cost-per-unit allien-basal-dispersal-cost-per-unit
-    set basal-growth-cost-per-tick allien-basal-growth-cost-per-tick
-    set basal-homeostasis-cost-per-tick allien-basal-homeostasis-cost-per-tick
-    set basal-resource-intake allien-basal-resource-intake
-
-    ; BODY-SIZE SCALING TRAITS (but not allometrically
-    set energy-to-reproduce allien-energy-to-reproduce
-    set min-energy-after-reprod allien-min-energy-after-reprod
-    set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
-
-    ; STATS AND VISUALIZATION
-    set lineage-identity who
-    set size (body-size / 100)
-  ]
+; STATS
+to calculate-number-of-initial-lineages-remaining
 
 end
 @#$#@#$#@
@@ -709,7 +583,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-11.0
+331.0
 10
 1
 NIL
@@ -967,7 +841,7 @@ histogram of body sizes
 body size value
 NIL
 1.0
-130.0
+13.0
 0.0
 10.0
 true
@@ -1006,10 +880,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
 
 SLIDER
-906
-421
-1106
-454
+910
+402
+1110
+435
 resource-perception-radius
 resource-perception-radius
 0
@@ -1021,10 +895,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-918
-466
-1057
-499
+971
+449
+1110
+482
 big-move-first?
 big-move-first?
 0
@@ -1074,108 +948,6 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [resources] of patches"
-
-PLOT
-379
-30
-579
-180
-mean interbirth-interval
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [interbirth-interval] of turtles"
-
-PLOT
-167
-10
-367
-160
-ticks-since-last-reproduction
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ticks-since-last-reproduction] of turtles"
-
-BUTTON
-918
-342
-1016
-375
-degradation
-degrade-habitat
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-918
-308
-1026
-341
-extermination
-exterminate-habitat
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1036
-346
-1113
-379
-invasion
-add-invasives
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-SLIDER
-934
-381
-1106
-414
-alliens-nr
-alliens-nr
-0
-500
-100.0
-10
-1
-NIL
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -11,7 +11,8 @@ patch_size (in pixels)
 10
 ###
 
-###METABOLIC THEORY CONSTANTS###
-metabolic_allometric_exponent
+###WORLD CONSTANTS###
+metabolic-allometric-exponent
 0.75
-###
+ratio-of-mean-body-size-to-stand-dev (* mean body size of agents = sd of random-normal body size sd)
+1

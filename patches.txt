@@ -1,11 +1,11 @@
 ###PATCH TRAITS###
 starting resources
-10
-10
+1
+2
 max resources
-20
-20
+5
+5
 resource_regen
 1
-1
+5
 ###
