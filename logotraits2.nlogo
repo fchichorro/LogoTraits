@@ -555,24 +555,29 @@ end
 
 to exterminate-habitat
   ask one-of patches [
-    exterminate-patch
+    exterminate-patch hunter-steps
   ]
 end
 
-to exterminate-patch
-  ask n-of 2 neighbors [
-    ifelse count turtles-here > 0
-    [
-      watch-me
-      ask turtles-here
+to exterminate-patch [steps-remaining]
+  if steps-remaining > 0 [
+    ask max-n-of 1 patch-set neighbors [sum [energy] of turtles-here][
+      ifelse count turtles-here > 0
       [
-        die
-      ]
-      exterminate-patch
-    ]
-    [
-      stop
+        ;watch-me
 
+        ask turtles-here
+        [
+          die
+        ]
+
+      ]
+      ;else
+      [
+      ]
+      set pcolor red
+      set steps-remaining steps-remaining - 1
+      exterminate-patch steps-remaining
     ]
   ]
 end
@@ -646,6 +651,14 @@ to add-invasives
     set size (body-size / 100)
   ]
 
+end
+
+
+to reset-patch-colors
+  ask patches
+  [
+    set pcolor base-color
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -907,10 +920,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [disp-ability] of turtles"
 
 PLOT
-1029
-169
-1229
-319
+1137
+108
+1337
+258
 mean age
 NIL
 NIL
@@ -1172,6 +1185,38 @@ alliens-nr
 0
 500
 100.0
+10
+1
+NIL
+HORIZONTAL
+
+BUTTON
+1030
+306
+1161
+339
+reset patch colors
+reset-patch-colors
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+918
+652
+1090
+685
+hunter-steps
+hunter-steps
+0
+500
+160.0
 10
 1
 NIL
