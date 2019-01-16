@@ -14,5 +14,5 @@ patch_size (in pixels)
 ###WORLD CONSTANTS###
 metabolic-allometric-exponent
 0.75
-ratio-of-mean-body-size-to-stand-dev (* mean body size of agents = sd of random-normal body size sd)
+stand-dev-to-body-size (* mean body size of agents = sd of random-normal body size sd)
 1

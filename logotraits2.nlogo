@@ -81,6 +81,7 @@ turtles-own[
   interbirth-interval
   fecundity
   maturity-age
+  longevity
   habitat-spec
   sexual?
   disp-ability
@@ -260,7 +261,7 @@ to setup
     set interbirth-interval one-of ( range interbirth-interval-min ( interbirth-interval-max + 1 ))
     set fecundity one-of (range fecundity-min ( fecundity-max + 1 ))
     set maturity-age one-of (range maturity-age-min ( maturity-age-max + 1 ))
-    ;set longevity one-of (range longevity-min (longevity-max + 1))
+    set longevity one-of (range longevity-min (longevity-max + 1))
     set habitat-spec one-of list habitat-spec-min habitat-spec-max
     set sexual? one-of list sexual?-min sexual?-max
     set disp-ability one-of (range disp-ability-min ( disp-ability-max + 1 ))
@@ -287,7 +288,7 @@ to setup
 
     ; STATS AND VISUALIZATION
     set lineage-identity who
-    set size (body-size / 100)
+    set size (body-size / 500)
   ]
 
 end
@@ -399,7 +400,8 @@ to agents-go
   if energy < 0 [die]
   ; in test
   if random-float 1 < mortality-rate [die]
-  ;if random
+  ; die of old age
+  if random age > longevity [die]
 end
 
 to eat
@@ -508,11 +510,41 @@ end
 
 to reproduce
   let energy_to_offspring energy - min-energy-after-reprod
+  let parent-body-size body-size
   repeat fecundity
   [
     hatch 1 [
       set energy (energy_to_offspring / [fecundity] of myself)
       set age 0
+      set body-size random-normal [body-size] of myself ([body-size] of myself * mutation-size)
+      set interbirth-interval random-normal [interbirth-interval] of myself ([interbirth-interval] of myself * mutation-size)
+      set fecundity  random-poisson [fecundity] of myself
+      set maturity-age random-normal [maturity-age] of myself ([maturity-age] of myself * mutation-size)
+      set longevity random-normal [longevity] of myself ([longevity] of myself * mutation-size)
+      ;set habitat-spec
+      ;set sexual?
+      set disp-ability random-normal [disp-ability] of myself ([disp-ability] of myself * mutation-size)
+      ;set disp-stage
+      ;set climate-optimum
+      ;set climate-sd
+
+      ; * BODY-SIZE ^ allometric-constant TRAITS
+      set basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+      set basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+      set basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+      set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+
+
+      ; BODY-SIZE SCALING TRAITS (but not allometrically
+      set energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+      set min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+
+      set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
+
+      ; STATS AND VISUALIZATION
+      set lineage-identity who
+      set size (body-size / 500)
+
     ]
   ]
 end
@@ -588,7 +620,7 @@ to add-invasives
   let allien-interbirth-interval one-of ( range interbirth-interval-min ( interbirth-interval-max + 1 ))
   let allien-fecundity one-of (range fecundity-min ( fecundity-max + 1 ))
   let allien-maturity-age one-of (range maturity-age-min ( maturity-age-max + 1 ))
-  ;set longevity one-of (range longevity-min (longevity-max + 1))
+  let allien-longevity one-of (range longevity-min (longevity-max + 1))
   let allien-habitat-spec one-of list habitat-spec-min habitat-spec-max
   let allien-sexual? one-of list sexual?-min sexual?-max
   let allien-disp-ability one-of (range disp-ability-min ( disp-ability-max + 1 ))
@@ -621,7 +653,7 @@ to add-invasives
     set interbirth-interval allien-interbirth-interval
     set fecundity allien-fecundity
     set maturity-age allien-maturity-age
-    ;set longevity one-of (range longevity-min (longevity-max + 1))
+    set longevity allien-longevity
     set habitat-spec allien-habitat-spec
     set sexual? allien-sexual?
     set disp-ability allien-disp-ability
@@ -780,10 +812,10 @@ NIL
 1
 
 BUTTON
-466
-453
-529
-486
+467
+454
+530
+487
 NIL
 go
 T
@@ -980,7 +1012,7 @@ histogram of body sizes
 body size value
 NIL
 1.0
-130.0
+1000.0
 0.0
 10.0
 true
@@ -1027,7 +1059,7 @@ resource-perception-radius
 resource-perception-radius
 0
 5
-1.0
+2.0
 1
 1
 NIL
@@ -1089,10 +1121,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [resources] of patches"
 
 PLOT
-379
-30
-579
-180
+330
+10
+530
+160
 mean interbirth-interval
 NIL
 NIL
@@ -1105,24 +1137,6 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [interbirth-interval] of turtles"
-
-PLOT
-167
-10
-367
-160
-ticks-since-last-reproduction
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ticks-since-last-reproduction] of turtles"
 
 BUTTON
 918
@@ -1216,11 +1230,44 @@ hunter-steps
 hunter-steps
 0
 500
-160.0
+280.0
 10
 1
 NIL
 HORIZONTAL
+
+SLIDER
+787
+745
+959
+778
+mutation-size
+mutation-size
+0
+0.5
+0.05
+0.01
+1
+NIL
+HORIZONTAL
+
+PLOT
+125
+10
+325
+160
+mean max longevity
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [longevity] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?

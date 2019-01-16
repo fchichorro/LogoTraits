@@ -7,20 +7,20 @@ males_per_female (if sexual? = True only)
 
 ###FOCAL TRAITS###
 body size (max amount of energy available)
-30
-120
+100
+100
 interbirth_interval (ticks)
-10
-10
+25
+150
 fecundity (number of offspring)
 1
 1
 maturity_age (in ticks)
-40
-40
+25
+150
 longevity (in ticks)
-80
-80
+200
+250
 habitat_spec
 1,0,0,0
 1,0,0,0
@@ -31,8 +31,8 @@ disp_ability
 1
 1
 disp_stage
-1,1
-1,1
+1,0
+1,0
 climate_optimum
 0.5
 0.8
