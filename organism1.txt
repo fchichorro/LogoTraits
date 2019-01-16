@@ -10,16 +10,16 @@ body size (max amount of energy available)
 100
 100
 interbirth_interval (ticks)
-25
-150
+10
+10
 fecundity (number of offspring)
 1
 1
 maturity_age (in ticks)
-25
-150
+50
+50
 longevity (in ticks)
-200
+250
 250
 habitat_spec
 1,0,0,0
@@ -28,11 +28,11 @@ sexual?
 false
 false
 disp_ability
-1
-1
+5
+5
 disp_stage
-1,0
-1,0
+1,1
+1,1
 climate_optimum
 0.5
 0.8
