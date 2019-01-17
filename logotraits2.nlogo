@@ -290,7 +290,7 @@ to setup
 
     ; STATS AND VISUALIZATION
     set lineage-identity who
-    set size (body-size / 400)
+    set size (body-size / 300)
   ]
 
 end
@@ -547,7 +547,7 @@ to reproduce
 
       ; STATS AND VISUALIZATION
       set lineage-identity who
-      set size (body-size / 400)
+      set size (body-size / 300)
 
     ]
   ]
@@ -617,6 +617,7 @@ to exterminate-patch [steps-remaining]
     ]
   ]
 end
+
 
 to add-invasives
   let allien-color white
@@ -771,23 +772,6 @@ BUTTON
 290
 NIL
 setup
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-775
-271
-841
-304
-import
-import-organism-parameters \"organism1.txt\"
 NIL
 1
 T
@@ -988,24 +972,6 @@ mortality-rate
 1
 NIL
 HORIZONTAL
-
-PLOT
-1122
-502
-1322
-652
-histogram of initial lineages
-lineage code
-NIL
-0.0
-100.0
-0.0
-10.0
-true
-false
-"set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
-PENS
-"default" 1.0 0 -16777216 true "" "histogram [lineage-identity] of turtles"
 
 PLOT
 1120
@@ -1234,7 +1200,7 @@ hunter-steps
 hunter-steps
 0
 500
-290.0
+60.0
 10
 1
 NIL
@@ -1279,7 +1245,7 @@ reproductive-cost
 reproductive-cost
 0
 1
-0.4
+0.15
 0.01
 1
 NIL
