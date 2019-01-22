@@ -373,6 +373,8 @@ to agents-go-random
 end
 
 to agents-go
+  if energy < basal-homeostasis-cost-per-tick [die] ;if agents don't have enough energy to cover losses they die
+
   ifelse random-walk?
   [ disperse]
   [let energy-income get-energy-income
@@ -381,8 +383,7 @@ to agents-go
       disperse
     ]
   ]
-  set energy energy - basal-homeostasis-cost-per-tick
-  if energy < 0 [die]
+
 
   if energy < body-size [
     eat
@@ -401,11 +402,10 @@ to agents-go
   [
     set energy energy - basal-growth-cost-per-tick
   ]
-
+  set energy energy - basal-homeostasis-cost-per-tick
   set ticks-since-last-reproduction ticks-since-last-reproduction + 1
   set age age + 1
 
-  if energy < 0 [die]
   ; in test
   if random-float 1 < mortality-rate [die]
   ; die of old age
