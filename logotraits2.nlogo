@@ -349,8 +349,11 @@ end
 to regen-resources
   if resources < max-resources
   [
-    set resource-regen one-of (range resource-regen-min (resource-regen-max + resource-regen-step) resource-regen-step)
     set resources resources + resource-regen
+  ]
+  if resources > max-resources
+  [
+    set resources max-resources
   ]
 end
 
@@ -378,6 +381,9 @@ to agents-go
       disperse
     ]
   ]
+  set energy energy - basal-homeostasis-cost-per-tick
+  if energy < 0 [die]
+
   if energy < body-size [
     eat
   ]
@@ -398,7 +404,7 @@ to agents-go
 
   set ticks-since-last-reproduction ticks-since-last-reproduction + 1
   set age age + 1
-  set energy energy - basal-homeostasis-cost-per-tick
+
   if energy < 0 [die]
   ; in test
   if random-float 1 < mortality-rate [die]
@@ -521,7 +527,7 @@ to reproduce
       set age 0
       set body-size random-normal [body-size] of myself ([body-size] of myself * mutation-size)
       set interbirth-interval random-normal [interbirth-interval] of myself ([interbirth-interval] of myself * mutation-size)
-      set fecundity  random-poisson [fecundity] of myself
+      set fecundity  random-normal [fecundity] of myself ([fecundity] of myself * mutation-size-fecundity)
       if fecundity < 1 [set fecundity 1]
       set maturity-age random-normal [maturity-age] of myself ([maturity-age] of myself * mutation-size)
       set longevity maturity-longevity-coefficient * maturity-age
@@ -817,10 +823,10 @@ NIL
 1
 
 MONITOR
-387
-258
-470
-303
+563
+120
+646
+165
 NIL
 count turtles
 17
@@ -828,10 +834,10 @@ count turtles
 11
 
 PLOT
-334
-501
-534
-651
+251
+490
+451
+640
 mean body-size
 NIL
 NIL
@@ -875,10 +881,10 @@ seeds for complete random map:
 11
 
 MONITOR
-382
-210
-484
-255
+558
+72
+660
+117
 green patches
 count patches with [pcolor = green]
 17
@@ -886,10 +892,10 @@ count patches with [pcolor = green]
 11
 
 PLOT
-121
-500
-321
-650
+46
+490
+246
+640
 Number of organisms
 NIL
 NIL
@@ -922,10 +928,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [maturity-age] of turtles"
 
 PLOT
-127
-160
-327
-310
+46
+188
+246
+338
 mean dispersal ability
 NIL
 NIL
@@ -1073,28 +1079,10 @@ NIL
 HORIZONTAL
 
 PLOT
-199
-677
-399
-827
-mean resources
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [resources] of patches"
-
-PLOT
-330
-10
-530
-160
+251
+186
+451
+336
 mean interbirth-interval
 NIL
 NIL
@@ -1258,13 +1246,67 @@ SLIDER
 816
 mutation-size-fecundity
 mutation-size-fecundity
-0.5
+0.1
 5
-0.9
+0.4
 0.1
 1
 NIL
 HORIZONTAL
+
+PLOT
+251
+641
+451
+791
+total energy
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [energy] of turtles"
+
+PLOT
+47
+641
+247
+791
+total resources
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
+
+PLOT
+1371
+556
+1705
+782
+small body size hist
+NIL
+NIL
+0.0
+200.0
+0.0
+10.0
+true
+false
+"set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
+PENS
+"default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?

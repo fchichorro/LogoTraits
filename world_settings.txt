@@ -15,4 +15,4 @@ patch_size (in pixels)
 metabolic-allometric-exponent
 0.75
 stand-dev-to-body-size (* mean body size of agents = sd of random-normal body size sd)
-1
+0.5
