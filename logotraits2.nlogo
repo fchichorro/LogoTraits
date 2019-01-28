@@ -333,6 +333,8 @@ to go
 
   patches-go
 
+  perturbations-go
+
   tick
 end
 
@@ -345,6 +347,36 @@ to patches-go
   ]
 end
 
+to perturbations-go
+  if direct-event-on?
+  [
+    if ticks mod direct-event-frequency = 0
+    [
+      ask n-of (direct-event-amplitude * count turtles) turtles [
+        die
+      ]
+    ]
+
+  ]
+  if indirect-event-on?
+  [
+    if ticks mod indirect-event-frequency  = 0
+    [
+      carefully [
+        ask n-of (indirect-event-amplitude * count patches) patches with [pcolor != 0]
+        [
+          set pcolor 0
+          set max-resources 0
+          set resources 0
+          set resource-regen 0
+        ]
+      ]
+      [
+        show "no more healthy patches"
+      ]
+    ]
+  ]
+end
 
 to regen-resources
   if resources < max-resources
@@ -834,10 +866,10 @@ count turtles
 11
 
 PLOT
-251
-490
-451
-640
+249
+492
+449
+642
 mean body-size
 NIL
 NIL
@@ -852,10 +884,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [body-size] of turtles"
 
 PLOT
-251
-338
-451
-488
+249
+340
+449
+490
 mean fecundity
 NIL
 NIL
@@ -965,10 +997,10 @@ PENS
 "max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
 
 SLIDER
-632
-707
-804
-740
+577
+722
+749
+755
 mortality-rate
 mortality-rate
 0
@@ -1079,10 +1111,10 @@ NIL
 HORIZONTAL
 
 PLOT
-251
-186
-451
-336
+249
+188
+449
+338
 mean interbirth-interval
 NIL
 NIL
@@ -1255,10 +1287,10 @@ NIL
 HORIZONTAL
 
 PLOT
-251
-641
-451
-791
+249
+643
+449
+793
 total energy
 NIL
 NIL
@@ -1307,6 +1339,108 @@ false
 "set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
 PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
+
+TEXTBOX
+1462
+143
+1612
+161
+indirect event
+11
+0.0
+1
+
+TEXTBOX
+1584
+142
+1734
+160
+direct event
+11
+0.0
+1
+
+SLIDER
+1627
+176
+1806
+209
+direct-event-frequency
+direct-event-frequency
+0
+2000
+160.0
+10
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1635
+270
+1783
+303
+direct-event-on?
+direct-event-on?
+0
+1
+-1000
+
+SLIDER
+1632
+224
+1807
+257
+direct-event-amplitude
+direct-event-amplitude
+0.01
+1
+0.63
+0.01
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1403
+259
+1560
+292
+indirect-event-on?
+indirect-event-on?
+1
+1
+-1000
+
+SLIDER
+1397
+179
+1585
+212
+indirect-event-frequency
+indirect-event-frequency
+0
+2000
+270.0
+10
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1402
+221
+1587
+254
+indirect-event-amplitude
+indirect-event-amplitude
+0.01
+1
+0.06
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
