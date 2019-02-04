@@ -69,6 +69,7 @@ globals[
 
   ; in test
   ;mortality-rate
+  ongoing-indirect-perturbation?
 
   ; STATS
   number-of-initial-lineages-remaining
@@ -111,6 +112,12 @@ patches-own[
   resources
   max-resources
   resource-regen
+
+  original-resources
+  original-max-resources
+  original-resource-regen
+
+  under-perturbation?
 
   ; visualization
   base-color
@@ -244,11 +251,18 @@ to setup
   set-world-parameters
   generate-landscape-of-patch-types
   import-patch-parameters
+  set ongoing-indirect-perturbation? false
   ;initialize patches
   ask patches [
     set resources one-of (range starting-resources-min ( starting-resources-max + 1 ))
     set max-resources one-of (range max-resources-min ( max-resources-max + 1 ))
     set resource-regen one-of (range resource-regen-min (resource-regen-max + resource-regen-step) resource-regen-step)
+
+    set original-resources resources
+    set original-max-resources max-resources
+    set original-resource-regen resource-regen
+
+    set under-perturbation? false
   ]
 
 
@@ -350,7 +364,7 @@ end
 to perturbations-go
   if direct-event-on?
   [
-    if ticks mod direct-event-frequency = 0
+    if random-float 1 < direct-event-frequency
     [
       ask n-of (direct-event-amplitude * count turtles) turtles [
         die
@@ -360,19 +374,60 @@ to perturbations-go
   ]
   if indirect-event-on?
   [
-    if ticks mod indirect-event-frequency  = 0
+    ifelse random-float 1 < indirect-event-frequency
     [
-      carefully [
-        ask n-of (indirect-event-amplitude * count patches) patches with [pcolor != 0]
+      ifelse ongoing-indirect-perturbation?
+      []
+      ;else
+      [
+        set ongoing-indirect-perturbation? true
+        let patches-altered 0
+        let max-patches-altered indirect-event-coverage * count patches
+        ask n-of (max-patches-altered / (max-patches-altered * indirect-event-clustering)) patches
         [
           set pcolor 0
-          set max-resources 0
-          set resources 0
-          set resource-regen 0
+          set max-resources (max-resources - max-resources * indirect-event-amplitude)
+          set resources (resources - resources * indirect-event-amplitude)
+          set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
+
+          set under-perturbation? true
+
+          set patches-altered patches-altered + 1
+          if patches-altered > max-patches-altered
+          [stop]
+        ]
+        while [patches-altered < max-patches-altered] [
+          ask patches with [under-perturbation? = true]
+          [
+            ask one-of neighbors [
+              set pcolor 0
+              set max-resources (max-resources - max-resources * indirect-event-amplitude)
+              set resources (resources - resources * indirect-event-amplitude)
+              set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
+
+              set under-perturbation? true
+
+              set patches-altered patches-altered + 1
+              if patches-altered > max-patches-altered [stop]
+            ]
+          ]
         ]
       ]
+    ]
+    ;else
+    [
+      if ongoing-indirect-perturbation? = true
       [
-        show "no more healthy patches"
+        ask patches with [under-perturbation? = true]
+        [
+          set pcolor item resource-type patch-palette
+          set max-resources original-max-resources
+          set resources original-resources
+          set resource-regen original-resource-regen
+          set under-perturbation? false
+
+          set ongoing-indirect-perturbation? false
+        ]
       ]
     ]
   ]
@@ -737,10 +792,10 @@ to reset-patch-colors
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-557
-338
-895
-677
+651
+335
+989
+674
 -1
 -1
 10.0
@@ -764,20 +819,20 @@ ticks
 30.0
 
 TEXTBOX
-576
-226
-726
-244
+654
+229
+804
+247
 Patch initialization
 11
 0.0
 1
 
 SLIDER
-571
-249
-743
-282
+649
+252
+821
+285
 num-of-patch-types
 num-of-patch-types
 1
@@ -789,10 +844,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-569
-285
-748
-318
+647
+288
+826
+321
 num-of-seeds-per-type
 num-of-seeds-per-type
 1
@@ -804,10 +859,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-894
-257
-957
-290
+972
+260
+1035
+293
 NIL
 setup
 NIL
@@ -821,10 +876,10 @@ NIL
 1
 
 BUTTON
-464
-373
-527
-406
+1214
+516
+1277
+549
 go
 go
 NIL
@@ -838,10 +893,10 @@ NIL
 1
 
 BUTTON
-467
-454
-530
-487
+1217
+597
+1280
+630
 NIL
 go
 T
@@ -855,10 +910,10 @@ NIL
 1
 
 MONITOR
-563
-120
-646
-165
+690
+65
+773
+110
 NIL
 count turtles
 17
@@ -866,10 +921,10 @@ count turtles
 11
 
 PLOT
-249
-492
-449
-642
+205
+482
+405
+632
 mean body-size
 NIL
 NIL
@@ -884,10 +939,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [body-size] of turtles"
 
 PLOT
-249
-340
-449
-490
+205
+330
+405
+480
 mean fecundity
 NIL
 NIL
@@ -902,10 +957,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [fecundity] of turtles"
 
 MONITOR
-758
-204
-992
-249
+836
+207
+1070
+252
 seeds for complete random map:
 (world-width * world-height) / num-of-patch-types
 0
@@ -913,10 +968,10 @@ seeds for complete random map:
 11
 
 MONITOR
-558
-72
-660
-117
+685
+17
+787
+62
 green patches
 count patches with [pcolor = green]
 17
@@ -924,10 +979,10 @@ count patches with [pcolor = green]
 11
 
 PLOT
-46
-490
-246
-640
+2
+480
+202
+630
 Number of organisms
 NIL
 NIL
@@ -942,10 +997,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles"
 
 PLOT
-46
-339
-246
-489
+2
+329
+202
+479
 mean maturity-age
 NIL
 NIL
@@ -960,10 +1015,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [maturity-age] of turtles"
 
 PLOT
-46
-188
-246
-338
+2
+178
+202
+328
 mean dispersal ability
 NIL
 NIL
@@ -978,10 +1033,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [disp-ability] of turtles"
 
 PLOT
-1137
-108
-1337
-258
+1215
+111
+1415
+261
 mean age
 NIL
 NIL
@@ -997,10 +1052,10 @@ PENS
 "max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
 
 SLIDER
-577
-722
-749
-755
+655
+725
+827
+758
 mortality-rate
 mortality-rate
 0
@@ -1012,10 +1067,10 @@ NIL
 HORIZONTAL
 
 PLOT
-1120
-654
-1320
-804
+1198
+657
+1398
+807
 histogram of body sizes
 body size value
 NIL
@@ -1030,10 +1085,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 SWITCH
-665
-150
-913
-183
+743
+153
+991
+186
 patch-color-scales-with-resources?
 patch-color-scales-with-resources?
 1
@@ -1041,10 +1096,10 @@ patch-color-scales-with-resources?
 -1000
 
 PLOT
-1122
-345
-1322
-495
+1200
+348
+1400
+498
 histogram of fecundity
 fecundity
 NIL
@@ -1059,10 +1114,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
 
 SLIDER
-906
-421
-1106
-454
+998
+417
+1198
+450
 resource-perception-radius
 resource-perception-radius
 0
@@ -1074,10 +1129,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-918
-466
-1057
-499
+1048
+494
+1187
+527
 big-move-first?
 big-move-first?
 0
@@ -1085,10 +1140,10 @@ big-move-first?
 -1000
 
 SWITCH
-976
-523
-1108
-556
+1054
+526
+1186
+559
 random-walk?
 random-walk?
 1
@@ -1096,10 +1151,10 @@ random-walk?
 -1000
 
 SLIDER
-936
-597
-1108
-630
+1014
+600
+1186
+633
 resource-regen-step
 resource-regen-step
 0
@@ -1111,10 +1166,10 @@ NIL
 HORIZONTAL
 
 PLOT
-249
-188
-449
-338
+205
+178
+405
+328
 mean interbirth-interval
 NIL
 NIL
@@ -1129,10 +1184,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [interbirth-interval] of turtles"
 
 BUTTON
-918
-342
-1016
-375
+996
+345
+1094
+378
 degradation
 degrade-habitat
 NIL
@@ -1146,10 +1201,10 @@ NIL
 1
 
 BUTTON
-918
-308
-1026
-341
+996
+311
+1104
+344
 extermination
 exterminate-habitat
 NIL
@@ -1163,10 +1218,10 @@ NIL
 1
 
 BUTTON
-1036
-346
-1113
-379
+1114
+349
+1191
+382
 invasion
 add-invasives
 NIL
@@ -1180,10 +1235,10 @@ NIL
 1
 
 SLIDER
-934
-381
-1106
-414
+1012
+384
+1184
+417
 alliens-nr
 alliens-nr
 0
@@ -1195,10 +1250,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-1030
-306
-1161
-339
+1108
+309
+1239
+342
 reset patch colors
 reset-patch-colors
 NIL
@@ -1212,10 +1267,10 @@ NIL
 1
 
 SLIDER
-918
-652
-1090
-685
+996
+655
+1168
+688
 hunter-steps
 hunter-steps
 0
@@ -1227,10 +1282,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-787
-745
-959
-778
+865
+748
+1037
+781
 mutation-size
 mutation-size
 0
@@ -1257,10 +1312,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-578
-757
-756
-790
+656
+760
+834
+793
 reproductive-cost
 reproductive-cost
 0
@@ -1272,10 +1327,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-798
-783
-978
-816
+876
+786
+1056
+819
 mutation-size-fecundity
 mutation-size-fecundity
 0.1
@@ -1287,10 +1342,10 @@ NIL
 HORIZONTAL
 
 PLOT
-249
-643
-449
-793
+205
+633
+405
+783
 total energy
 NIL
 NIL
@@ -1305,10 +1360,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [energy] of turtles"
 
 PLOT
-47
-641
-247
-791
+3
+631
+203
+781
 total resources
 NIL
 NIL
@@ -1323,10 +1378,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
 
 PLOT
-1371
-556
-1705
-782
+1449
+559
+1783
+785
 small body size hist
 NIL
 NIL
@@ -1341,103 +1396,163 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 TEXTBOX
-1462
-143
-1612
-161
+1555
+146
+1705
+164
 indirect event
 11
 0.0
 1
 
 TEXTBOX
-1584
-142
-1734
-160
+1677
+145
+1827
+163
 direct event
 11
 0.0
 1
 
 SLIDER
-1627
-176
-1806
-209
-direct-event-frequency
-direct-event-frequency
-0
-2000
-160.0
-10
-1
-NIL
-HORIZONTAL
-
-SWITCH
-1635
-270
-1783
-303
-direct-event-on?
-direct-event-on?
-0
-1
--1000
-
-SLIDER
-1632
-224
-1807
-257
-direct-event-amplitude
-direct-event-amplitude
-0.01
-1
-0.63
-0.01
-1
-NIL
-HORIZONTAL
-
-SWITCH
-1403
-259
-1560
-292
-indirect-event-on?
-indirect-event-on?
-1
-1
--1000
-
-SLIDER
-1397
+1705
 179
-1585
+1884
 212
+direct-event-frequency
+direct-event-frequency
+0
+1
+0.01
+0.01
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1707
+309
+1855
+342
+direct-event-on?
+direct-event-on?
+1
+1
+-1000
+
+SLIDER
+1705
+212
+1880
+245
+direct-event-amplitude
+direct-event-amplitude
+0.01
+1
+0.27
+0.01
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1476
+316
+1633
+349
+indirect-event-on?
+indirect-event-on?
+0
+1
+-1000
+
+SLIDER
+1475
+182
+1663
+215
 indirect-event-frequency
 indirect-event-frequency
 0
-2000
-270.0
-10
+1
+0.97
+0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1402
-221
-1587
-254
+1476
+215
+1661
+248
 indirect-event-amplitude
 indirect-event-amplitude
 0.01
 1
-0.06
+1.0
 0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1475
+251
+1659
+284
+indirect-event-coverage
+indirect-event-coverage
+0
+1
+0.36
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1706
+243
+1880
+276
+direct-event-coverage
+direct-event-coverage
+0
+1
+0.0
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1706
+276
+1881
+309
+direct-event-clustering
+direct-event-clustering
+0
+1
+0.0
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1475
+282
+1660
+315
+indirect-event-clustering
+indirect-event-clustering
+0.001
+1
+0.002
+0.001
 1
 NIL
 HORIZONTAL
