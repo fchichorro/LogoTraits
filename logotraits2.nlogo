@@ -383,7 +383,7 @@ to perturbations-go
         set ongoing-indirect-perturbation? true
         let patches-altered 0
         let max-patches-altered indirect-event-coverage * count patches
-        ask n-of (max-patches-altered / (max-patches-altered * indirect-event-clustering)) patches
+        ask n-of (max-patches-altered - (max-patches-altered * indirect-event-clustering)) patches
         [
           set pcolor 0
           set max-resources (max-resources - max-resources * indirect-event-amplitude)
@@ -397,7 +397,7 @@ to perturbations-go
           [stop]
         ]
         while [patches-altered < max-patches-altered] [
-          ask patches with [under-perturbation? = true]
+          ask one-of patches with [under-perturbation? = true]
           [
             ask one-of neighbors [
               set pcolor 0
@@ -408,7 +408,6 @@ to perturbations-go
               set under-perturbation? true
 
               set patches-altered patches-altered + 1
-              if patches-altered > max-patches-altered [stop]
             ]
           ]
         ]
@@ -1476,7 +1475,7 @@ indirect-event-frequency
 indirect-event-frequency
 0
 1
-0.97
+1.0
 0.01
 1
 NIL
@@ -1506,7 +1505,7 @@ indirect-event-coverage
 indirect-event-coverage
 0
 1
-0.36
+0.18
 0.01
 1
 NIL
@@ -1551,7 +1550,7 @@ indirect-event-clustering
 indirect-event-clustering
 0.001
 1
-0.002
+0.577
 0.001
 1
 NIL
