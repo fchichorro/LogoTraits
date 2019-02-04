@@ -105,6 +105,11 @@ turtles-own[
   ;stats
   lineage-identity
 
+  realized-maturity-age
+  realized-fecundity
+  realized-dispersal-ability
+  realized-interbirth-interval
+
 ]
 
 patches-own[
@@ -480,6 +485,7 @@ to agents-go
       if ticks-since-last-reproduction > interbirth-interval
       [
       reproduce
+      set realized-interbirth-interval ticks-since-last-reproduction
       set ticks-since-last-reproduction -1 ; -1 because below we add +1
       ]
       ]
@@ -606,6 +612,8 @@ to reproduce
   let energy_to_offspring energy - min-energy-after-reprod - reproductive-cost
   let parent-body-size body-size
   set energy min-energy-after-reprod
+  set realized-maturity-age age
+
   repeat fecundity
   [
     hatch 1 [
