@@ -928,10 +928,10 @@ count turtles
 11
 
 PLOT
-205
-482
-405
-632
+2
+481
+202
+631
 mean body-size
 NIL
 NIL
@@ -946,10 +946,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [body-size] of turtles"
 
 PLOT
-205
-330
-405
-480
+4
+631
+204
+781
 mean fecundity
 NIL
 NIL
@@ -986,10 +986,10 @@ count patches with [pcolor = green]
 11
 
 PLOT
-2
-480
-202
-630
+433
+130
+633
+280
 Number of organisms
 NIL
 NIL
@@ -1022,10 +1022,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [maturity-age] of turtles"
 
 PLOT
-2
-178
-202
-328
+3
+30
+203
+180
 mean dispersal ability
 NIL
 NIL
@@ -1173,10 +1173,10 @@ NIL
 HORIZONTAL
 
 PLOT
-205
-178
-405
-328
+3
+179
+203
+329
 mean interbirth-interval
 NIL
 NIL
@@ -1349,10 +1349,10 @@ NIL
 HORIZONTAL
 
 PLOT
-205
+433
+432
 633
-405
-783
+582
 total energy
 NIL
 NIL
@@ -1367,10 +1367,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [energy] of turtles"
 
 PLOT
-3
-631
-203
-781
+433
+281
+633
+431
 total resources
 NIL
 NIL
@@ -1470,7 +1470,7 @@ SWITCH
 349
 indirect-event-on?
 indirect-event-on?
-0
+1
 1
 -1000
 
@@ -1563,6 +1563,42 @@ indirect-event-clustering
 1
 NIL
 HORIZONTAL
+
+PLOT
+203
+330
+403
+480
+mean realized rep age
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [realized-maturity-age] of turtles"
+
+PLOT
+203
+179
+403
+329
+mean realized-interbirth-interval
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [realized-interbirth-interval] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
