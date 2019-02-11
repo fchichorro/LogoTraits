@@ -367,7 +367,7 @@ to patches-go
 end
 
 to perturbations-go
-  if direct-event-on?
+  if direct-event?
   [
     if random-float 1 < direct-event-frequency
     [
@@ -377,7 +377,7 @@ to perturbations-go
     ]
 
   ]
-  if indirect-event-on?
+  if indirect-event?
   [
     ifelse random-float 1 < indirect-event-frequency
     [
@@ -1442,8 +1442,8 @@ SWITCH
 309
 1855
 342
-direct-event-on?
-direct-event-on?
+direct-event?
+direct-event?
 1
 1
 -1000
@@ -1468,8 +1468,8 @@ SWITCH
 316
 1633
 349
-indirect-event-on?
-indirect-event-on?
+indirect-event?
+indirect-event?
 1
 1
 -1000
