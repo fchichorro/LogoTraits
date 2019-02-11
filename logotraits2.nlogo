@@ -498,8 +498,6 @@ to agents-go
   set ticks-since-last-reproduction ticks-since-last-reproduction + 1
   set age age + 1
 
-  ; in test
-  if random-float 1 < mortality-rate [die]
   ; die of old age
   if random age > longevity [die]
 end
