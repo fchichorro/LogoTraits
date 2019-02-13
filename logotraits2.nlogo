@@ -450,7 +450,7 @@ end
 
 to agents-go-bigger-first
   ;foreach sort-on [-1 * body-size + random-float 1 + random-float -1] turtles
-  foreach sort-on [-1 * random-normal body-size (((body-size-min + body-size-max) / 2) * stand-dev-to-body-size)] turtles
+  foreach sort-on [-1 * random-normal body-size (body-size * stand-dev-to-body-size)] turtles
   [ the-turtle -> ask the-turtle [
     agents-go
     ]
@@ -607,7 +607,7 @@ to disperse
 end
 
 to reproduce
-  let energy_to_offspring energy - min-energy-after-reprod - reproductive-cost
+  let energy_to_offspring energy - min-energy-after-reprod - reproduction-cost
   let parent-body-size body-size
   set energy min-energy-after-reprod
   set realized-maturity-age age
@@ -1429,7 +1429,7 @@ direct-event-frequency
 direct-event-frequency
 0
 1
-0.01
+0.0
 0.01
 1
 NIL
@@ -1511,7 +1511,7 @@ indirect-event-coverage
 indirect-event-coverage
 0
 1
-0.18
+0.51
 0.01
 1
 NIL
