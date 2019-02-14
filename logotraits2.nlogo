@@ -404,7 +404,7 @@ to perturbations-go
         while [patches-altered < max-patches-altered] [
           ask one-of patches with [under-perturbation? = true]
           [
-            ask one-of neighbors [
+            ask one-of neighbors with [under-perturbation? = false] [
               set pcolor 0
               set max-resources (max-resources - max-resources * indirect-event-amplitude)
               set resources (resources - resources * indirect-event-amplitude)
@@ -1056,21 +1056,6 @@ PENS
 "mean" 1.0 0 -16777216 true "" "plot mean [age] of turtles"
 "max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
 
-SLIDER
-655
-725
-827
-758
-mortality-rate
-mortality-rate
-0
-1
-0.0
-0.01
-1
-NIL
-HORIZONTAL
-
 PLOT
 1198
 657
@@ -1187,57 +1172,6 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [interbirth-interval] of turtles"
-
-BUTTON
-996
-345
-1094
-378
-degradation
-degrade-habitat
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-996
-311
-1104
-344
-extermination
-exterminate-habitat
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1114
-349
-1191
-382
-invasion
-add-invasives
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
 
 SLIDER
 1012
@@ -1429,7 +1363,7 @@ direct-event-frequency
 direct-event-frequency
 0
 1
-0.0
+0.09
 0.01
 1
 NIL
@@ -1468,7 +1402,7 @@ SWITCH
 349
 indirect-event?
 indirect-event?
-1
+0
 1
 -1000
 
@@ -1481,7 +1415,7 @@ indirect-event-frequency
 indirect-event-frequency
 0
 1
-1.0
+0.96
 0.01
 1
 NIL
@@ -1496,7 +1430,7 @@ indirect-event-amplitude
 indirect-event-amplitude
 0.01
 1
-1.0
+0.54
 0.01
 1
 NIL
@@ -1511,7 +1445,7 @@ indirect-event-coverage
 indirect-event-coverage
 0
 1
-0.51
+1.0
 0.01
 1
 NIL
@@ -1960,6 +1894,80 @@ NetLogo 6.0.3
     </enumeratedValueSet>
     <enumeratedValueSet variable="num-of-seeds-per-type">
       <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="indirect-event?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="hunter-steps">
+      <value value="60"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random-walk?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="patch-color-scales-with-resources?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-coverage">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-amplitude">
+      <value value="0.27"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-clustering">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resource-regen-step">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="reproductive-cost">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="maturity-longevity-coefficient">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-amplitude">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-frequency">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-frequency">
+      <value value="0.09"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="num-of-patch-types">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="big-move-first?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-coverage">
+      <value value="0.51"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-clustering">
+      <value value="0.577"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="alliens-nr">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="num-of-seeds-per-type">
+      <value value="11"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resource-perception-radius">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-fecundity">
+      <value value="0.4"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
