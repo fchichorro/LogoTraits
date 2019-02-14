@@ -390,7 +390,7 @@ to perturbations-go
         let max-patches-altered indirect-event-coverage * count patches
         ask n-of (max-patches-altered - (max-patches-altered * indirect-event-clustering)) patches
         [
-          set pcolor 0
+          set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
           set max-resources (max-resources - max-resources * indirect-event-amplitude)
           set resources (resources - resources * indirect-event-amplitude)
           set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
@@ -402,18 +402,23 @@ to perturbations-go
           [stop]
         ]
         while [patches-altered < max-patches-altered] [
-          ask one-of patches with [under-perturbation? = true]
-          [
-            ask one-of neighbors with [under-perturbation? = false] [
-              set pcolor 0
-              set max-resources (max-resources - max-resources * indirect-event-amplitude)
-              set resources (resources - resources * indirect-event-amplitude)
-              set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
+          carefully [
+            ask one-of patches with [under-perturbation? = true]
+            [
+              ask one-of neighbors with [under-perturbation? = false] [
+                set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
+                set max-resources (max-resources - max-resources * indirect-event-amplitude)
+                set resources (resources - resources * indirect-event-amplitude)
+                set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
 
-              set under-perturbation? true
+                set under-perturbation? true
 
-              set patches-altered patches-altered + 1
+                set patches-altered patches-altered + 1
+              ]
             ]
+          ]
+          [
+
           ]
         ]
       ]
@@ -1402,7 +1407,7 @@ SWITCH
 349
 indirect-event?
 indirect-event?
-0
+1
 1
 -1000
 
@@ -1415,7 +1420,7 @@ indirect-event-frequency
 indirect-event-frequency
 0
 1
-0.96
+1.0
 0.01
 1
 NIL
@@ -1430,7 +1435,7 @@ indirect-event-amplitude
 indirect-event-amplitude
 0.01
 1
-0.54
+0.5
 0.01
 1
 NIL
@@ -1445,7 +1450,7 @@ indirect-event-coverage
 indirect-event-coverage
 0
 1
-1.0
+0.83
 0.01
 1
 NIL
@@ -1490,7 +1495,7 @@ indirect-event-clustering
 indirect-event-clustering
 0.001
 1
-0.577
+0.982
 0.001
 1
 NIL
