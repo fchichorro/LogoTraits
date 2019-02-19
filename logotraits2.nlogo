@@ -279,6 +279,7 @@ to perturbations-go
           if random-float 1 < direct-event-amplitude [
             die
           ]
+          set under-d-perturbation? false
         ]
       ]
     ]
