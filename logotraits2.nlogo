@@ -18,7 +18,6 @@ globals[
 
   ; ORGANISMS
   ; POPULATION LEVEL PARAMETERS
-  n1
   males-per-female
 
   ; FOCAL TRAITS
@@ -63,10 +62,6 @@ globals[
   ratio-min-energy-after-reprod-min
   ratio-min-energy-after-reprod-max
 
-  ; WORLD CONSTANTS
-  metabolic-allometric-exponent
-  stand-dev-to-body-size
-
   ; in test
   ;mortality-rate
   ongoing-indirect-perturbation?
@@ -87,8 +82,6 @@ turtles-own[
   sexual?
   disp-ability
   disp-stage
-  climate-optimum
-  climate-sd
 
   ; NON-FOCAL TRAITS
   energy
@@ -133,135 +126,23 @@ breed [organisms2 organism2]
 
 ; Import world parameters
 to set-world-parameters
-  file-open "world_settings.txt"
-  repeat 2 [ show file-read-line ]
-  let min-xcor read-from-string file-read-line
-  show file-read-line
-  let max-xcor read-from-string file-read-line
-  show file-read-line
-  let min-ycor read-from-string file-read-line
-  show file-read-line
-  let max-ycor read-from-string file-read-line
-  show file-read-line
-  set-patch-size (read-from-string file-read-line)
+
+  set-patch-size patch-n-pixels
   resize-world min-xcor max-xcor min-ycor max-ycor
-  repeat 3 [ show file-read-line ]
-
-  ; METABOLIC THEORY CONSTANTS
-  show file-read-line
-  set metabolic-allometric-exponent (read-from-string file-read-line)
-  show file-read-line
-  set stand-dev-to-body-size (read-from-string file-read-line)
-  file-close
 
 end
-
-
-
-; Import from files
-to import-organism-parameters [ filename ]
-  file-open filename
-
-  ; POPULATION LEVEL PARAMETERS
-  repeat 2 [ show file-read-line ]
-  set n1 read-from-string file-read-line
-  show file-read-line
-  set males-per-female read-from-string file-read-line
-  repeat 3 [ show file-read-line ]
-
-  ; FOCAL TRAITS
-  show file-read-line
-  set body-size-min read-from-string file-read-line
-  set body-size-max read-from-string file-read-line
-  show file-read-line
-  set interbirth-interval-min read-from-string file-read-line
-  set interbirth-interval-max read-from-string file-read-line
-  show file-read-line
-  set fecundity-min read-from-string file-read-line
-  set fecundity-max read-from-string file-read-line
-  show file-read-line
-  set maturity-age-min read-from-string file-read-line
-  set maturity-age-max read-from-string file-read-line
-  show file-read-line
-  set longevity-min read-from-string file-read-line
-  set longevity-max read-from-string file-read-line
-  show file-read-line
-  set habitat-spec-min csv:from-row file-read-line
-  set habitat-spec-max csv:from-row file-read-line
-  show file-read-line
-  set sexual?-min read-from-string file-read-line
-  set sexual?-max read-from-string file-read-line
-  show file-read-line
-  set disp-ability-min read-from-string file-read-line
-  set disp-ability-max read-from-string file-read-line
-  show file-read-line
-  set disp-stage-min csv:from-row file-read-line
-  set disp-stage-max csv:from-row file-read-line
-  show file-read-line
-  set climate-optimum-min read-from-string file-read-line
-  set climate-optimum-max read-from-string file-read-line
-  show file-read-line
-  set climate-sd-min read-from-string file-read-line
-  set climate-sd-max read-from-string file-read-line
-  repeat 3 [ show file-read-line ]
-
-  ; NON-FOCAL TRAITS
-  show file-read-line
-  set starting-energy-min read-from-string file-read-line
-  set starting-energy-max read-from-string file-read-line
-  show file-read-line
-  set starting-age-min read-from-string file-read-line
-  set starting-age-max read-from-string file-read-line
-  show file-read-line
-  set basal-dispersal-cost-per-unit-min read-from-string file-read-line
-  set basal-dispersal-cost-per-unit-max read-from-string file-read-line
-  show file-read-line
-  set basal-growth-cost-per-tick-min read-from-string file-read-line
-  set basal-growth-cost-per-tick-max read-from-string file-read-line
-  show file-read-line
-  set basal-homeostasis-cost-per-tick-min read-from-string file-read-line
-  set basal-homeostasis-cost-per-tick-max read-from-string file-read-line
-  show file-read-line
-  set basal-resource-intake-min read-from-string file-read-line
-  set basal-resource-intake-max read-from-string file-read-line
-  show file-read-line
-  set ratio-energy-to-reproduce-min read-from-string file-read-line
-  set ratio-energy-to-reproduce-max read-from-string file-read-line
-  show file-read-line
-  set ratio-min-energy-after-reprod-min read-from-string file-read-line
-  set ratio-min-energy-after-reprod-max read-from-string file-read-line
-
-  file-close
-end
-
-; Import from files
-to import-patch-parameters
-  file-open "patches.txt"
-  repeat 2 [ show file-read-line ]
-  set starting-resources-min read-from-string file-read-line
-  set starting-resources-max read-from-string file-read-line
-  show file-read-line
-  set max-resources-min read-from-string file-read-line
-  set max-resources-max read-from-string file-read-line
-  show file-read-line
-  set resource-regen-min read-from-string file-read-line
-  set resource-regen-max read-from-string file-read-line
-  file-close
-end
-
 
 to setup
   clear-all
   reset-ticks
   set-world-parameters
   generate-landscape-of-patch-types
-  import-patch-parameters
   set ongoing-indirect-perturbation? false
   ;initialize patches
   ask patches [
-    set resources one-of (range starting-resources-min ( starting-resources-max + 1 ))
-    set max-resources one-of (range max-resources-min ( max-resources-max + 1 ))
-    set resource-regen one-of (range resource-regen-min (resource-regen-max + resource-regen-step) resource-regen-step)
+    set resources starting-resources
+    set max-resources starting-max-resources
+    set resource-regen starting-resource-regen
 
     set original-resources resources
     set original-max-resources max-resources
@@ -270,46 +151,42 @@ to setup
     set under-perturbation? false
   ]
 
-
-  import-organism-parameters "organism1.txt"
   ;create organisms1
-  create-organisms1 n1
+  create-organisms1 starting-no
   [
 
     ; FOCAL TRAITS
-    set body-size one-of (range body-size-min ( body-size-max + 1 ))
-    set interbirth-interval one-of ( range interbirth-interval-min ( interbirth-interval-max + 1 ))
-    set fecundity one-of (range fecundity-min ( fecundity-max + 1 ))
-    set maturity-age one-of (range maturity-age-min ( maturity-age-max + 1 ))
+    set body-size starting-body-size
+    set interbirth-interval starting-interbirth-interval
+    set fecundity starting-fecundity
+    set maturity-age starting-maturity-age
     set longevity maturity-longevity-coefficient * maturity-age
-    set habitat-spec one-of list habitat-spec-min habitat-spec-max
-    set sexual? one-of list sexual?-min sexual?-max
-    set disp-ability one-of (range disp-ability-min ( disp-ability-max + 1 ))
-    set disp-stage one-of list disp-stage-min disp-stage-max
-    set climate-optimum one-of (range (climate-optimum-min * 100) (climate-optimum-max  * 100 + 1) ) / 100
-    set climate-sd one-of (range (climate-sd-min * 100) (climate-sd-max  * 100 + 1) ) / 100
+    set habitat-spec csv:from-row starting-habitat-spec
+    set sexual? starting-sexual?
+    set disp-ability starting-disp-ability
+    set disp-stage csv:from-row starting-disp-stage
 
     ; INITIAL ENERGY AND AGE AND SPATIAL CORDINATES
     set xcor random-xcor
     set ycor random-ycor
-    set energy one-of (range starting-energy-min ( starting-energy-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    set age one-of (range starting-age-min (starting-age-max + 1 ))
+    set energy starting-energy * (body-size ^ metabolic-allometric-exponent)
+    set age starting-age
 
     ; * BODY-SIZE ^ allometric-constant TRAITS
-    set basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    set basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    set basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+    set basal-dispersal-cost-per-unit starting-basal-dispersal-cost-per-unit * (body-size ^ metabolic-allometric-exponent)
+    set basal-growth-cost-per-tick starting-basal-growth-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
+    set basal-homeostasis-cost-per-tick starting-basal-homeostasis-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
+    set basal-resource-intake starting-basal-resource-intake * (body-size ^ metabolic-allometric-exponent)
 
     ; BODY-SIZE SCALING TRAITS (but not allometrically
-    set energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-    set min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+    set energy-to-reproduce starting-ratio-energy-to-reproduce * (body-size ^ metabolic-allometric-exponent)
+    set min-energy-after-reprod starting-ratio-min-energy-after-reprod * (body-size ^ metabolic-allometric-exponent)
     set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
     set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
 
     ; STATS AND VISUALIZATION
     set lineage-identity who
-    set size (body-size / 300)
+    set size (body-size / 100)
   ]
 
 end
@@ -418,7 +295,6 @@ to perturbations-go
             ]
           ]
           [
-
           ]
         ]
       ]
@@ -636,161 +512,23 @@ to reproduce
       ;set climate-sd
 
       ; * BODY-SIZE ^ allometric-constant TRAITS
-      set basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-      set basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-      set basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-      set basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-
+      set basal-dispersal-cost-per-unit starting-basal-dispersal-cost-per-unit * (body-size ^ metabolic-allometric-exponent)
+      set basal-growth-cost-per-tick starting-basal-growth-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
+      set basal-homeostasis-cost-per-tick starting-basal-homeostasis-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
+      set basal-resource-intake starting-basal-resource-intake * (body-size ^ metabolic-allometric-exponent)
 
       ; BODY-SIZE SCALING TRAITS (but not allometrically
-      set energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
-      set min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * (body-size ^ metabolic-allometric-exponent)
+      set energy-to-reproduce starting-ratio-energy-to-reproduce * (body-size ^ metabolic-allometric-exponent)
+      set min-energy-after-reprod starting-ratio-min-energy-after-reprod * (body-size ^ metabolic-allometric-exponent)
       set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
       set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
 
       ; STATS AND VISUALIZATION
       set lineage-identity who
-      set size (body-size / 300)
+      set size (body-size / 100)
 
     ]
   ]
-end
-
-
-to create-offspring
-
-
-
-end
-
-
-; THREATS
-
-to degrade-habitat
-  ask one-of patches with [pcolor != 0][
-      set resources 0
-      set max-resources 0
-      set resource-regen 0
-      set pcolor 0
-    degrade-patch
-  ]
-end
-
-to degrade-patch
-  ask n-of 1 neighbors [
-    ifelse pcolor != 0 [
-
-      set resources 0
-      set max-resources 0
-      set resource-regen 0
-      set pcolor 0
-      degrade-patch
-    ]
-    [
-      stop
-    ]
-  ]
-end
-
-to exterminate-habitat
-  ask one-of patches [
-    exterminate-patch hunter-steps
-  ]
-end
-
-to exterminate-patch [steps-remaining]
-  if steps-remaining > 0 [
-    ask max-n-of 1 patch-set neighbors [sum [energy] of turtles-here][
-      ifelse count turtles-here > 0
-      [
-        ;watch-me
-
-        ask turtles-here
-        [
-          die
-        ]
-
-      ]
-      ;else
-      [
-      ]
-      set pcolor red
-      set steps-remaining steps-remaining - 1
-      exterminate-patch steps-remaining
-    ]
-  ]
-end
-
-
-to add-invasives
-  let allien-color white
-  let allien-body-size one-of (range body-size-min ( body-size-max + 1 ))
-  let allien-interbirth-interval one-of ( range interbirth-interval-min ( interbirth-interval-max + 1 ))
-  let allien-fecundity one-of (range fecundity-min ( fecundity-max + 1 ))
-  let allien-maturity-age one-of (range maturity-age-min ( maturity-age-max + 1 ))
-  let allien-longevity maturity-longevity-coefficient * allien-maturity-age
-  let allien-habitat-spec one-of list habitat-spec-min habitat-spec-max
-  let allien-sexual? one-of list sexual?-min sexual?-max
-  let allien-disp-ability one-of (range disp-ability-min ( disp-ability-max + 1 ))
-  let allien-disp-stage one-of list disp-stage-min disp-stage-max
-  let allien-climate-optimum one-of (range (climate-optimum-min * 100) (climate-optimum-max  * 100 + 1) ) / 100
-  let allien-climate-sd one-of (range (climate-sd-min * 100) (climate-sd-max  * 100 + 1) ) / 100
-
-  ; INITIAL ENERGY AND AGE AND SPATIAL CORDINATES
-  let allien-xcor random-xcor
-  let allien-ycor random-ycor
-  let allien-energy one-of (range starting-energy-min ( starting-energy-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-age one-of (range starting-age-min (starting-age-max + 1 ))
-
-  ; * BODY-SIZE ^ allometric-constant TRAITS
-  let allien-basal-dispersal-cost-per-unit one-of (range basal-dispersal-cost-per-unit-min ( basal-dispersal-cost-per-unit-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-basal-growth-cost-per-tick one-of (range basal-growth-cost-per-tick-min ( basal-growth-cost-per-tick-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-basal-homeostasis-cost-per-tick one-of (range  basal-homeostasis-cost-per-tick-min ( basal-homeostasis-cost-per-tick-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-basal-resource-intake one-of (range basal-resource-intake-min ( basal-resource-intake-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
- ; BODY-SIZE SCALING TRAITS (but not allometrically
-  let allien-energy-to-reproduce one-of (range ratio-energy-to-reproduce-min ( ratio-energy-to-reproduce-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-min-energy-after-reprod one-of (range ratio-min-energy-after-reprod-min ( ratio-min-energy-after-reprod-max + 1 )) * (allien-body-size ^ metabolic-allometric-exponent)
-  let allien-ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
-
-
-  create-organisms1 alliens-nr
-  [
-    set color allien-color
-    ; FOCAL TRAITS
-    set body-size allien-body-size
-    set interbirth-interval allien-interbirth-interval
-    set fecundity allien-fecundity
-    set maturity-age allien-maturity-age
-    set longevity allien-longevity
-    set habitat-spec allien-habitat-spec
-    set sexual? allien-sexual?
-    set disp-ability allien-disp-ability
-    set disp-stage allien-disp-stage
-    set climate-optimum allien-climate-optimum
-    set climate-sd allien-climate-sd
-
-    ; INITIAL ENERGY AND AGE AND SPATIAL CORDINATES
-    set xcor allien-xcor
-    set ycor allien-ycor
-    set energy allien-energy
-    set age allien-age
-
-    ; * BODY-SIZE ^ allometric-constant TRAITS
-    set basal-dispersal-cost-per-unit allien-basal-dispersal-cost-per-unit
-    set basal-growth-cost-per-tick allien-basal-growth-cost-per-tick
-    set basal-homeostasis-cost-per-tick allien-basal-homeostasis-cost-per-tick
-    set basal-resource-intake allien-basal-resource-intake
-
-    ; BODY-SIZE SCALING TRAITS (but not allometrically
-    set energy-to-reproduce allien-energy-to-reproduce
-    set min-energy-after-reprod allien-min-energy-after-reprod
-    set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
-
-    ; STATS AND VISUALIZATION
-    set lineage-identity who
-    set size (body-size / 100)
-  ]
-
 end
 
 
@@ -946,7 +684,8 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [body-size] of turtles"
+"mean" 1.0 0 -16777216 true "let mean-bs mean [body-size] of turtles" "plot mean [body-size] of turtles"
+"lower sd" 1.0 0 -2674135 true "" "plot median [body-size] of turtles"
 
 PLOT
 4
@@ -1109,25 +848,25 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
 
 SLIDER
-998
-417
-1198
-450
+1633
+793
+1833
+826
 resource-perception-radius
 resource-perception-radius
 0
 5
-2.0
+1.0
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-1048
-494
-1187
-527
+710
+762
+849
+795
 big-move-first?
 big-move-first?
 0
@@ -1135,10 +874,10 @@ big-move-first?
 -1000
 
 SWITCH
-1054
-526
-1186
-559
+716
+794
+848
+827
 random-walk?
 random-walk?
 1
@@ -1178,21 +917,6 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [interbirth-interval] of turtles"
 
-SLIDER
-1012
-384
-1184
-417
-alliens-nr
-alliens-nr
-0
-500
-100.0
-10
-1
-NIL
-HORIZONTAL
-
 BUTTON
 1108
 309
@@ -1211,25 +935,10 @@ NIL
 1
 
 SLIDER
-996
-655
-1168
-688
-hunter-steps
-hunter-steps
-0
-500
-60.0
-10
-1
-NIL
-HORIZONTAL
-
-SLIDER
-865
-748
-1037
-781
+434
+624
+606
+657
 mutation-size
 mutation-size
 0
@@ -1256,10 +965,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-656
-760
-834
-793
+434
+590
+612
+623
 reproductive-cost
 reproductive-cost
 0
@@ -1271,10 +980,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-876
-786
-1056
-819
+433
+657
+613
+690
 mutation-size-fecundity
 mutation-size-fecundity
 0.1
@@ -1322,10 +1031,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
 
 PLOT
-1449
-559
-1783
-785
+1406
+656
+1607
+822
 small body size hist
 NIL
 NIL
@@ -1340,20 +1049,20 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 TEXTBOX
-1555
-146
-1705
-164
+1516
+163
+1666
+181
 indirect event
 11
 0.0
 1
 
 TEXTBOX
-1677
-145
-1827
-163
+1736
+160
+1886
+178
 direct event
 11
 0.0
@@ -1368,7 +1077,7 @@ direct-event-frequency
 direct-event-frequency
 0
 1
-0.09
+0.03
 0.01
 1
 NIL
@@ -1407,7 +1116,7 @@ SWITCH
 349
 indirect-event?
 indirect-event?
-1
+0
 1
 -1000
 
@@ -1495,7 +1204,7 @@ indirect-event-clustering
 indirect-event-clustering
 0.001
 1
-0.982
+0.981
 0.001
 1
 NIL
@@ -1536,6 +1245,333 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [realized-interbirth-interval] of turtles"
+
+INPUTBOX
+1675
+457
+1765
+517
+starting-body-size
+100.0
+1
+0
+Number
+
+INPUTBOX
+1768
+458
+1895
+518
+starting-interbirth-interval
+10.0
+1
+0
+Number
+
+INPUTBOX
+1578
+457
+1673
+517
+starting-fecundity
+1.0
+1
+0
+Number
+
+INPUTBOX
+1458
+457
+1574
+517
+starting-maturity-age
+20.0
+1
+0
+Number
+
+INPUTBOX
+1560
+396
+1687
+456
+starting-habitat-spec
+1,0,0,0
+1
+0
+String
+
+INPUTBOX
+1690
+396
+1789
+456
+starting-disp-ability
+2.0
+1
+0
+Number
+
+INPUTBOX
+1458
+396
+1558
+456
+starting-disp-stage
+1,1
+1
+0
+String
+
+SWITCH
+1459
+518
+1603
+551
+starting-sexual?
+starting-sexual?
+1
+1
+-1000
+
+INPUTBOX
+1616
+520
+1703
+580
+starting-energy
+0.2
+1
+0
+Number
+
+INPUTBOX
+1705
+521
+1860
+581
+starting-age
+5.0
+1
+0
+Number
+
+INPUTBOX
+1460
+552
+1559
+612
+starting-basal-dispersal-cost-per-unit
+0.02
+1
+0
+Number
+
+INPUTBOX
+1582
+582
+1695
+642
+starting-basal-growth-cost-per-tick
+0.02
+1
+0
+Number
+
+INPUTBOX
+1711
+589
+1845
+649
+starting-basal-homeostasis-cost-per-tick
+0.02
+1
+0
+Number
+
+INPUTBOX
+1644
+663
+1764
+723
+starting-basal-resource-intake
+0.1
+1
+0
+Number
+
+INPUTBOX
+1777
+661
+1941
+721
+starting-ratio-energy-to-reproduce
+0.67
+1
+0
+Number
+
+INPUTBOX
+1634
+732
+1789
+792
+starting-ratio-min-energy-after-reprod
+0.33
+1
+0
+Number
+
+INPUTBOX
+1791
+396
+1874
+456
+starting-no
+100.0
+1
+0
+Number
+
+INPUTBOX
+1963
+445
+2079
+505
+starting-resources
+2.0
+1
+0
+Number
+
+INPUTBOX
+1963
+505
+2080
+565
+starting-max-resources
+6.0
+1
+0
+Number
+
+INPUTBOX
+1962
+566
+2080
+626
+starting-resource-regen
+2.0
+1
+0
+Number
+
+INPUTBOX
+1966
+229
+2044
+289
+min-xcor
+-16.0
+1
+0
+Number
+
+INPUTBOX
+2045
+229
+2124
+289
+max-xcor
+16.0
+1
+0
+Number
+
+INPUTBOX
+1966
+290
+2044
+350
+min-ycor
+-16.0
+1
+0
+Number
+
+INPUTBOX
+2045
+290
+2123
+350
+max-ycor
+16.0
+1
+0
+Number
+
+INPUTBOX
+1966
+350
+2044
+410
+patch-n-pixels
+10.0
+1
+0
+Number
+
+INPUTBOX
+1969
+146
+2073
+206
+metabolic-allometric-exponent
+0.75
+1
+0
+Number
+
+INPUTBOX
+2074
+146
+2178
+206
+stand-dev-to-body-size
+1.0
+1
+0
+Number
+
+TEXTBOX
+1980
+120
+2130
+138
+world
+11
+0.0
+1
+
+TEXTBOX
+1972
+212
+2122
+230
+world dimensions
+11
+0.0
+1
+
+TEXTBOX
+1971
+425
+2069
+443
+Patches
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1879,103 +1915,10 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
-<experiments>
-  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <metric>count turtles</metric>
-    <enumeratedValueSet variable="num-of-patch-types">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="patch-color-scales-with-resources?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="mortality-rate">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="num-of-seeds-per-type">
-      <value value="1"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <metric>count turtles</metric>
-    <enumeratedValueSet variable="indirect-event?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="hunter-steps">
-      <value value="60"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="random-walk?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="patch-color-scales-with-resources?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="direct-event-coverage">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="direct-event-amplitude">
-      <value value="0.27"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="direct-event-clustering">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="resource-regen-step">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="reproductive-cost">
-      <value value="0.15"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="mutation-size">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="maturity-longevity-coefficient">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="indirect-event-amplitude">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="indirect-event-frequency">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="direct-event-frequency">
-      <value value="0.09"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="num-of-patch-types">
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="big-move-first?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="direct-event?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="indirect-event-coverage">
-      <value value="0.51"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="indirect-event-clustering">
-      <value value="0.577"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="alliens-nr">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="num-of-seeds-per-type">
-      <value value="11"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="resource-perception-radius">
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="mutation-size-fecundity">
-      <value value="0.4"/>
-    </enumeratedValueSet>
-  </experiment>
-</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
