@@ -115,7 +115,8 @@ patches-own[
   original-max-resources
   original-resource-regen
 
-  under-perturbation?
+  under-i-perturbation?
+  under-d-perturbation?
 
   ; visualization
   base-color
@@ -148,7 +149,8 @@ to setup
     set original-max-resources max-resources
     set original-resource-regen resource-regen
 
-    set under-perturbation? false
+    set under-i-perturbation? false
+    set under-d-perturbation? false
   ]
 
   ;create organisms1
@@ -248,11 +250,38 @@ to perturbations-go
   [
     if random-float 1 < direct-event-frequency
     [
-      ask n-of (direct-event-amplitude * count turtles) turtles [
-        die
+      let patches-altered 0
+      let max-patches-altered direct-event-coverage * count patches
+      ask n-of (max-patches-altered - (max-patches-altered * direct-event-clustering)) patches
+      [
+
+        set under-d-perturbation? true
+
+        set patches-altered patches-altered + 1
+        if patches-altered > max-patches-altered
+        [stop]
+      ]
+      while [patches-altered < max-patches-altered] [
+        carefully [
+          ask one-of patches with [under-d-perturbation? = true]
+          [
+            ask one-of neighbors with [under-d-perturbation? = false] [
+              set under-d-perturbation? true
+              set patches-altered patches-altered + 1
+            ]
+          ]
+        ]
+        [
+        ]
+      ]
+      ask patches with [under-d-perturbation? = true] [
+        ask turtles-here [
+          if random-float 1 < direct-event-amplitude [
+            die
+          ]
+        ]
       ]
     ]
-
   ]
   if indirect-event?
   [
@@ -272,7 +301,7 @@ to perturbations-go
           set resources (resources - resources * indirect-event-amplitude)
           set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
 
-          set under-perturbation? true
+          set under-i-perturbation? true
 
           set patches-altered patches-altered + 1
           if patches-altered > max-patches-altered
@@ -280,15 +309,15 @@ to perturbations-go
         ]
         while [patches-altered < max-patches-altered] [
           carefully [
-            ask one-of patches with [under-perturbation? = true]
+            ask one-of patches with [under-i-perturbation? = true]
             [
-              ask one-of neighbors with [under-perturbation? = false] [
+              ask one-of neighbors with [under-i-perturbation? = false] [
                 set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
                 set max-resources (max-resources - max-resources * indirect-event-amplitude)
                 set resources (resources - resources * indirect-event-amplitude)
                 set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
 
-                set under-perturbation? true
+                set under-i-perturbation? true
 
                 set patches-altered patches-altered + 1
               ]
@@ -303,13 +332,13 @@ to perturbations-go
     [
       if ongoing-indirect-perturbation? = true
       [
-        ask patches with [under-perturbation? = true]
+        ask patches with [under-i-perturbation? = true]
         [
           set pcolor item resource-type patch-palette
           set max-resources original-max-resources
           set resources original-resources
           set resource-regen original-resource-regen
-          set under-perturbation? false
+          set under-i-perturbation? false
 
           set ongoing-indirect-perturbation? false
         ]
@@ -540,10 +569,10 @@ to reset-patch-colors
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-651
-335
-989
-674
+644
+235
+982
+574
 -1
 -1
 10.0
@@ -567,20 +596,20 @@ ticks
 30.0
 
 TEXTBOX
-654
-229
-804
-247
-Patch initialization
+1786
+20
+1936
+38
+Map generator
 11
 0.0
 1
 
 SLIDER
-649
-252
-821
-285
+1781
+43
+1953
+76
 num-of-patch-types
 num-of-patch-types
 1
@@ -592,10 +621,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-647
-288
-826
-321
+1779
+79
+1958
+112
 num-of-seeds-per-type
 num-of-seeds-per-type
 1
@@ -607,10 +636,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-972
-260
-1035
-293
+996
+469
+1059
+502
 NIL
 setup
 NIL
@@ -624,10 +653,10 @@ NIL
 1
 
 BUTTON
-1214
-516
-1277
-549
+995
+503
+1058
+536
 go
 go
 NIL
@@ -641,10 +670,10 @@ NIL
 1
 
 BUTTON
-1217
-597
-1280
-630
+995
+538
+1058
+571
 NIL
 go
 T
@@ -706,10 +735,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [fecundity] of turtles"
 
 MONITOR
-836
-207
-1070
-252
+1777
+114
+1964
+159
 seeds for complete random map:
 (world-width * world-height) / num-of-patch-types
 0
@@ -782,10 +811,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [disp-ability] of turtles"
 
 PLOT
-1215
-111
-1415
-261
+1000
+247
+1200
+397
 mean age
 NIL
 NIL
@@ -801,10 +830,10 @@ PENS
 "max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
 
 PLOT
-1198
-657
-1398
-807
+996
+578
+1196
+728
 histogram of body sizes
 body size value
 NIL
@@ -819,10 +848,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 SWITCH
-743
-153
 991
-186
+401
+1239
+434
 patch-color-scales-with-resources?
 patch-color-scales-with-resources?
 1
@@ -830,10 +859,10 @@ patch-color-scales-with-resources?
 -1000
 
 PLOT
-1200
-348
-1400
-498
+1122
+434
+1322
+584
 histogram of fecundity
 fecundity
 NIL
@@ -848,10 +877,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
 
 SLIDER
-1633
-793
-1833
-826
+1573
+766
+1773
+799
 resource-perception-radius
 resource-perception-radius
 0
@@ -863,10 +892,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-710
-762
-849
-795
+1257
+55
+1389
+88
 big-move-first?
 big-move-first?
 0
@@ -874,10 +903,10 @@ big-move-first?
 -1000
 
 SWITCH
-716
-794
-848
-827
+1257
+88
+1389
+121
 random-walk?
 random-walk?
 1
@@ -885,10 +914,10 @@ random-walk?
 -1000
 
 SLIDER
-1014
-600
-1186
-633
+1652
+227
+1824
+260
 resource-regen-step
 resource-regen-step
 0
@@ -918,10 +947,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [interbirth-interval] of turtles"
 
 BUTTON
-1108
-309
-1239
-342
+995
+437
+1126
+470
 reset patch colors
 reset-patch-colors
 NIL
@@ -935,10 +964,10 @@ NIL
 1
 
 SLIDER
-434
-624
-606
-657
+1257
+251
+1429
+284
 mutation-size
 mutation-size
 0
@@ -950,10 +979,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-779
-92
-992
-125
+1257
+120
+1470
+153
 maturity-longevity-coefficient
 maturity-longevity-coefficient
 1
@@ -965,10 +994,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-434
-590
-612
-623
+1257
+217
+1435
+250
 reproductive-cost
 reproductive-cost
 0
@@ -980,10 +1009,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-433
-657
-613
-690
+1256
+284
+1436
+317
 mutation-size-fecundity
 mutation-size-fecundity
 0.1
@@ -1031,10 +1060,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
 
 PLOT
-1406
-656
-1607
-822
+1198
+578
+1399
+728
 small body size hist
 NIL
 NIL
@@ -1049,30 +1078,30 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 TEXTBOX
-1516
-163
-1666
-181
+871
+38
+1021
+56
 indirect event
 11
 0.0
 1
 
 TEXTBOX
-1736
-160
-1886
-178
+1055
+37
+1205
+55
 direct event
 11
 0.0
 1
 
 SLIDER
-1705
-179
-1884
-212
+1024
+56
+1203
+89
 direct-event-frequency
 direct-event-frequency
 0
@@ -1084,10 +1113,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-1707
-309
-1855
-342
+1026
+186
+1174
+219
 direct-event?
 direct-event?
 1
@@ -1095,10 +1124,10 @@ direct-event?
 -1000
 
 SLIDER
-1705
-212
-1880
-245
+1024
+89
+1199
+122
 direct-event-amplitude
 direct-event-amplitude
 0.01
@@ -1110,21 +1139,21 @@ NIL
 HORIZONTAL
 
 SWITCH
-1476
-316
-1633
-349
+831
+191
+988
+224
 indirect-event?
 indirect-event?
-0
+1
 1
 -1000
 
 SLIDER
-1475
-182
-1663
-215
+830
+57
+1018
+90
 indirect-event-frequency
 indirect-event-frequency
 0
@@ -1136,10 +1165,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1476
-215
-1661
-248
+831
+90
+1016
+123
 indirect-event-amplitude
 indirect-event-amplitude
 0.01
@@ -1151,10 +1180,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1475
-251
-1659
-284
+830
+126
+1014
+159
 indirect-event-coverage
 indirect-event-coverage
 0
@@ -1166,10 +1195,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1706
-243
-1880
-276
+1025
+120
+1199
+153
 direct-event-coverage
 direct-event-coverage
 0
@@ -1181,25 +1210,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-1706
-276
-1881
-309
+1025
+153
+1200
+186
 direct-event-clustering
 direct-event-clustering
 0
 1
-0.0
+0.02
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1475
-282
-1660
-315
+830
+157
+1015
+190
 indirect-event-clustering
 indirect-event-clustering
 0.001
@@ -1247,10 +1276,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [realized-interbirth-interval] of turtles"
 
 INPUTBOX
-1675
-457
-1765
-517
+1619
+423
+1709
+483
 starting-body-size
 100.0
 1
@@ -1258,10 +1287,10 @@ starting-body-size
 Number
 
 INPUTBOX
-1768
-458
-1895
-518
+1712
+424
+1839
+484
 starting-interbirth-interval
 10.0
 1
@@ -1269,10 +1298,10 @@ starting-interbirth-interval
 Number
 
 INPUTBOX
-1578
-457
-1673
-517
+1522
+423
+1617
+483
 starting-fecundity
 1.0
 1
@@ -1280,10 +1309,10 @@ starting-fecundity
 Number
 
 INPUTBOX
-1458
-457
-1574
-517
+1402
+423
+1518
+483
 starting-maturity-age
 20.0
 1
@@ -1291,10 +1320,10 @@ starting-maturity-age
 Number
 
 INPUTBOX
-1560
-396
-1687
-456
+1504
+362
+1631
+422
 starting-habitat-spec
 1,0,0,0
 1
@@ -1302,10 +1331,10 @@ starting-habitat-spec
 String
 
 INPUTBOX
-1690
-396
-1789
-456
+1634
+362
+1733
+422
 starting-disp-ability
 2.0
 1
@@ -1313,10 +1342,10 @@ starting-disp-ability
 Number
 
 INPUTBOX
-1458
-396
-1558
-456
+1402
+362
+1502
+422
 starting-disp-stage
 1,1
 1
@@ -1324,10 +1353,10 @@ starting-disp-stage
 String
 
 SWITCH
-1459
-518
-1603
-551
+1402
+484
+1546
+517
 starting-sexual?
 starting-sexual?
 1
@@ -1335,10 +1364,10 @@ starting-sexual?
 -1000
 
 INPUTBOX
-1616
-520
-1703
-580
+1652
+570
+1739
+630
 starting-energy
 0.2
 1
@@ -1346,10 +1375,10 @@ starting-energy
 Number
 
 INPUTBOX
-1705
-521
-1860
-581
+1652
+509
+1807
+569
 starting-age
 5.0
 1
@@ -1357,10 +1386,10 @@ starting-age
 Number
 
 INPUTBOX
-1460
-552
-1559
-612
+1405
+600
+1504
+660
 starting-basal-dispersal-cost-per-unit
 0.02
 1
@@ -1368,10 +1397,10 @@ starting-basal-dispersal-cost-per-unit
 Number
 
 INPUTBOX
-1582
-582
-1695
-642
+1405
+661
+1518
+721
 starting-basal-growth-cost-per-tick
 0.02
 1
@@ -1379,10 +1408,10 @@ starting-basal-growth-cost-per-tick
 Number
 
 INPUTBOX
-1711
-589
-1845
-649
+1405
+540
+1539
+600
 starting-basal-homeostasis-cost-per-tick
 0.02
 1
@@ -1390,10 +1419,10 @@ starting-basal-homeostasis-cost-per-tick
 Number
 
 INPUTBOX
-1644
-663
-1764
-723
+1405
+722
+1525
+782
 starting-basal-resource-intake
 0.1
 1
@@ -1401,10 +1430,10 @@ starting-basal-resource-intake
 Number
 
 INPUTBOX
-1777
-661
-1941
-721
+1652
+642
+1816
+702
 starting-ratio-energy-to-reproduce
 0.67
 1
@@ -1412,10 +1441,10 @@ starting-ratio-energy-to-reproduce
 Number
 
 INPUTBOX
-1634
-732
-1789
-792
+1652
+702
+1807
+762
 starting-ratio-min-energy-after-reprod
 0.33
 1
@@ -1423,10 +1452,10 @@ starting-ratio-min-energy-after-reprod
 Number
 
 INPUTBOX
-1791
-396
-1874
-456
+1390
+56
+1473
+116
 starting-no
 100.0
 1
@@ -1434,10 +1463,10 @@ starting-no
 Number
 
 INPUTBOX
-1963
-445
-2079
-505
+1651
+45
+1767
+105
 starting-resources
 2.0
 1
@@ -1445,10 +1474,10 @@ starting-resources
 Number
 
 INPUTBOX
-1963
-505
-2080
-565
+1651
+105
+1768
+165
 starting-max-resources
 6.0
 1
@@ -1456,10 +1485,10 @@ starting-max-resources
 Number
 
 INPUTBOX
-1962
-566
-2080
-626
+1650
+166
+1768
+226
 starting-resource-regen
 2.0
 1
@@ -1467,10 +1496,10 @@ starting-resource-regen
 Number
 
 INPUTBOX
-1966
-229
-2044
-289
+1477
+53
+1555
+113
 min-xcor
 -16.0
 1
@@ -1478,10 +1507,10 @@ min-xcor
 Number
 
 INPUTBOX
-2045
-229
-2124
-289
+1556
+53
+1635
+113
 max-xcor
 16.0
 1
@@ -1489,10 +1518,10 @@ max-xcor
 Number
 
 INPUTBOX
-1966
-290
-2044
-350
+1477
+114
+1555
+174
 min-ycor
 -16.0
 1
@@ -1500,10 +1529,10 @@ min-ycor
 Number
 
 INPUTBOX
-2045
-290
-2123
-350
+1556
+114
+1634
+174
 max-ycor
 16.0
 1
@@ -1511,10 +1540,10 @@ max-ycor
 Number
 
 INPUTBOX
-1966
-350
-2044
-410
+1477
+174
+1555
+234
 patch-n-pixels
 10.0
 1
@@ -1522,10 +1551,10 @@ patch-n-pixels
 Number
 
 INPUTBOX
-1969
-146
-2073
-206
+1257
+155
+1361
+215
 metabolic-allometric-exponent
 0.75
 1
@@ -1533,10 +1562,10 @@ metabolic-allometric-exponent
 Number
 
 INPUTBOX
-2074
-146
-2178
-206
+1362
+155
+1466
+215
 stand-dev-to-body-size
 1.0
 1
@@ -1544,31 +1573,71 @@ stand-dev-to-body-size
 Number
 
 TEXTBOX
-1980
-120
-2130
-138
+1269
+32
+1419
+50
 world
 11
 0.0
 1
 
 TEXTBOX
-1972
-212
-2122
-230
+1483
+36
+1633
+54
 world dimensions
 11
 0.0
 1
 
 TEXTBOX
-1971
-425
-2069
-443
+1659
+25
+1757
+43
 Patches
+11
+0.0
+1
+
+TEXTBOX
+1410
+330
+1560
+348
+ORGANISM TRAITS\t\n
+11
+0.0
+1
+
+TEXTBOX
+1411
+346
+1561
+364
+focal traits
+11
+0.0
+1
+
+TEXTBOX
+1670
+493
+1820
+511
+starting age and energy
+11
+0.0
+1
+
+TEXTBOX
+1407
+523
+1575
+551
+energy expenditure and uptake
 11
 0.0
 1
@@ -1915,7 +1984,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
