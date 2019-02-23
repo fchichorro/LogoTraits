@@ -229,14 +229,14 @@ to go
   [agents-go-bigger-first]
   [agents-go-random]
 
-  patches-go
+  update-patch-resources
 
-  perturbations-go
+  update-perturbations
 
   tick
 end
 
-to patches-go
+to update-patch-resources
   ask patches [
     regen-resources
     if patch-color-scales-with-resources? [
@@ -245,19 +245,18 @@ to patches-go
   ]
 end
 
-to perturbations-go
+to update-perturbations
   if direct-event?
   [
     if random-float 1 < direct-event-frequency
     [
       let patches-altered 0
-      let max-patches-altered direct-event-coverage * count patches
-      ask n-of (max-patches-altered - (max-patches-altered * direct-event-clustering)) patches
+      let max-patches-altered ceiling (direct-event-coverage * count patches)
+      ask n-of ceiling (max-patches-altered - (max-patches-altered * direct-event-clustering) + 1) patches
       [
-
         set under-d-perturbation? true
-
         set patches-altered patches-altered + 1
+        set pcolor red
         if patches-altered > max-patches-altered
         [stop]
       ]
@@ -268,6 +267,7 @@ to perturbations-go
             ask one-of neighbors with [under-d-perturbation? = false] [
               set under-d-perturbation? true
               set patches-altered patches-altered + 1
+              set pcolor red
             ]
           ]
         ]
@@ -279,8 +279,8 @@ to perturbations-go
           if random-float 1 < direct-event-amplitude [
             die
           ]
-          set under-d-perturbation? false
         ]
+        set under-d-perturbation? false
       ]
     ]
   ]
@@ -294,8 +294,8 @@ to perturbations-go
       [
         set ongoing-indirect-perturbation? true
         let patches-altered 0
-        let max-patches-altered indirect-event-coverage * count patches
-        ask n-of (max-patches-altered - (max-patches-altered * indirect-event-clustering)) patches
+        let max-patches-altered ceiling (indirect-event-coverage * count patches)
+        ask n-of ceiling (max-patches-altered - (max-patches-altered * indirect-event-clustering) + 1) patches
         [
           set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
           set max-resources (max-resources - max-resources * indirect-event-amplitude)
@@ -375,17 +375,19 @@ to agents-go-random
 end
 
 to agents-go
-  if energy < basal-homeostasis-cost-per-tick [die] ;if agents don't have enough energy to cover losses they die
+  ;if agents don't have enough energy to cover losses they die
 
   ifelse random-walk?
   [ disperse]
-  [let energy-income get-energy-income
+  ;else
+  [
+    let energy-income get-energy-income
     let mean-energy-incomes get-mean-energy-incomes
     if (energy-income = 0) or (energy-income < mean-energy-incomes) [
       disperse
     ]
   ]
-
+  if energy < 0 [die]
 
   if energy < body-size [
     eat
@@ -672,9 +674,9 @@ NIL
 
 BUTTON
 995
-538
+536
 1058
-571
+569
 NIL
 go
 T
@@ -720,7 +722,7 @@ PENS
 PLOT
 4
 631
-204
+202
 781
 mean fecundity
 NIL
@@ -734,17 +736,7 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [fecundity] of turtles"
-
-MONITOR
-1777
-114
-1964
-159
-seeds for complete random map:
-(world-width * world-height) / num-of-patch-types
-0
-1
-11
+"pen-1" 1.0 0 -7500403 true "" "plot median [fecundity] of turtles"
 
 MONITOR
 685
@@ -914,21 +906,6 @@ random-walk?
 1
 -1000
 
-SLIDER
-1652
-227
-1824
-260
-resource-regen-step
-resource-regen-step
-0
-1
-0.1
-0.1
-1
-NIL
-HORIZONTAL
-
 PLOT
 3
 179
@@ -950,7 +927,7 @@ PENS
 BUTTON
 995
 437
-1126
+1095
 470
 reset patch colors
 reset-patch-colors
@@ -1107,7 +1084,7 @@ direct-event-frequency
 direct-event-frequency
 0
 1
-0.03
+0.06
 0.01
 1
 NIL
@@ -1133,7 +1110,7 @@ direct-event-amplitude
 direct-event-amplitude
 0.01
 1
-0.27
+0.62
 0.01
 1
 NIL
@@ -1174,7 +1151,7 @@ indirect-event-amplitude
 indirect-event-amplitude
 0.01
 1
-0.5
+1.0
 0.01
 1
 NIL
@@ -1204,7 +1181,7 @@ direct-event-coverage
 direct-event-coverage
 0
 1
-0.0
+0.81
 0.01
 1
 NIL
@@ -1219,7 +1196,7 @@ direct-event-clustering
 direct-event-clustering
 0
 1
-0.02
+0.34
 0.01
 1
 NIL
@@ -1232,9 +1209,9 @@ SLIDER
 190
 indirect-event-clustering
 indirect-event-clustering
-0.001
+0.000
 1
-0.981
+1.0
 0.001
 1
 NIL
@@ -1282,7 +1259,7 @@ INPUTBOX
 1709
 483
 starting-body-size
-100.0
+80.0
 1
 0
 Number
@@ -1641,6 +1618,23 @@ TEXTBOX
 energy expenditure and uptake
 11
 0.0
+1
+
+BUTTON
+693
+586
+756
+619
+NIL
+stop
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
 1
 
 @#$#@#$#@
