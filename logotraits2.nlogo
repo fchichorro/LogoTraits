@@ -137,7 +137,7 @@ to setup
   clear-all
   reset-ticks
   set-world-parameters
-  generate-landscape-of-patch-types
+  generate-map
   set ongoing-indirect-perturbation? false
   ;initialize patches
   ask patches [
@@ -194,7 +194,7 @@ to setup
 end
 
 
-to generate-landscape-of-patch-types
+to generate-map
   set patch-palette [green brown orange blue red magenta violet lime yellow]
   let i 1
   while [i <= num-of-patch-types]
