@@ -540,6 +540,15 @@ to reproduce
   ]
 end
 
+to-report calc-random-gamma-from-mean-and-sv [mean_ sd]
+  let alpha mean_ * mean_ / sd
+  let lambda 1 / (sd / mean_)
+
+  report random-gamma alpha lambda
+end
+
+
+
 
 to reset-patch-colors
   ask patches
@@ -1674,6 +1683,17 @@ mutation-size-maturity-age
 NIL
 HORIZONTAL
 
+INPUTBOX
+380
+655
+566
+790
+snapshot-at
+0\n50000\n51000\n52000\n100000\n101000\n102000\n103000
+1
+1
+String
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -2016,7 +2036,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
