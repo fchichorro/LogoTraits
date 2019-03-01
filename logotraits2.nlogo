@@ -482,29 +482,6 @@ to-report get-energy-income
   report energy-income
 end
 
-to eat-or-move
-  ; Eats whatever is under the agent.
-  ;
-  let energy-income 0
-  ask patch-here [
-    ifelse resources > [basal-resource-intake] of myself
-    [
-      ;multiply basal-resource intake by the habitat spec value
-      set energy-income [basal-resource-intake] of myself *
-      item resource-type [habitat-spec] of myself
-      set resources resources - [basal-resource-intake] of myself
-
-    ]
-    [
-      set energy-income ([basal-resource-intake] of myself +
-      (resources - [basal-resource-intake] of myself) ) *
-      item resource-type [habitat-spec] of myself
-      set resources 0
-    ]
-  ]
-  set energy energy + energy-income
-end
-
 
 to disperse
   ifelse (age < maturity-age and item 0 disp-stage = 0) or (age > maturity-age and item 1 disp-stage = 0)
@@ -1097,7 +1074,7 @@ SWITCH
 219
 direct-event?
 direct-event?
-1
+0
 1
 -1000
 
@@ -1123,7 +1100,7 @@ SWITCH
 224
 indirect-event?
 indirect-event?
-1
+0
 1
 -1000
 
@@ -1166,7 +1143,7 @@ indirect-event-coverage
 indirect-event-coverage
 0
 1
-0.83
+0.6
 0.01
 1
 NIL
@@ -1211,7 +1188,7 @@ indirect-event-clustering
 indirect-event-clustering
 0.000
 1
-1.0
+0.047
 0.001
 1
 NIL
@@ -2039,7 +2016,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
