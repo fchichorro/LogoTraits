@@ -513,7 +513,7 @@ to reproduce
       if fecundity < 1 [set fecundity 1]
       set maturity-age random-normal [maturity-age] of myself ([maturity-age] of myself * mutation-size)
       set longevity maturity-longevity-coefficient * maturity-age
-      ;set habitat-spec
+      set habitat-spec mutate-habitat-spec [habitat-spec] of myself
       ;set sexual?
       set disp-ability random-normal [disp-ability] of myself ([disp-ability] of myself * mutation-size)
       ;set disp-stage
@@ -547,7 +547,25 @@ to-report calc-random-gamma-from-mean-and-sv [mean_ sd]
   report random-gamma alpha lambda
 end
 
+to-report mutate-habitat-spec [hab-spec]
+  let new-habitat-spec [0 0 0 0]
+  let total-sum-of-random-gamma 0
+  let i 0
+  while [i < num-of-patch-types]
+  [
+    let new-random-gamma calc-random-gamma-from-mean-and-sv item i hab-spec mutation-size-habitat-spec
+    set new-habitat-spec replace-item i new-habitat-spec new-random-gamma
+    set total-sum-of-random-gamma total-sum-of-random-gamma + new-random-gamma
+    set i i + 1
+  ]
+  while [i < num-of-patch-types]
+  [
+    set new-habitat-spec replace-item i new-habitat-spec  ( item i new-habitat-spec / total-sum-of-random-gamma )
+    set i i + 1
+  ]
 
+  report new-habitat-spec
+end
 
 
 to reset-patch-colors
@@ -1083,7 +1101,7 @@ SWITCH
 219
 direct-event?
 direct-event?
-0
+1
 1
 -1000
 
@@ -1109,7 +1127,7 @@ SWITCH
 224
 indirect-event?
 indirect-event?
-0
+1
 1
 -1000
 
@@ -1289,7 +1307,7 @@ INPUTBOX
 1631
 422
 starting-habitat-spec
-1,0,0,0
+0.5,0.5,0,0
 1
 0
 String
@@ -1693,6 +1711,21 @@ snapshot-at
 1
 1
 String
+
+SLIDER
+1559
+321
+1756
+354
+mutation-size-habitat-spec
+mutation-size-habitat-spec
+0
+1
+0.05
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
