@@ -163,7 +163,8 @@ to setup
     set fecundity starting-fecundity
     set maturity-age starting-maturity-age
     set longevity maturity-longevity-coefficient * maturity-age
-    set habitat-spec csv:from-row starting-habitat-spec
+    ;set habitat-spec csv:from-row starting-habitat-spec
+    set habitat-spec one-of [[0.5 0.5 0 0] [1 0 0 0]]
     set sexual? starting-sexual?
     set disp-ability starting-disp-ability
     set disp-stage csv:from-row starting-disp-stage
@@ -426,6 +427,7 @@ to eat
       set energy-income [basal-resource-intake] of myself *
       item resource-type [habitat-spec] of myself
       set resources resources - [basal-resource-intake] of myself
+      ;set resources resources - energy-income
 
     ]
     [
@@ -541,26 +543,38 @@ to reproduce
 end
 
 to-report calc-random-gamma-from-mean-and-sv [mean_ sd]
+  if mean_ < 0.00000001
+  [  set mean_ 0.00000001 ]
+
   let alpha mean_ * mean_ / sd
   let lambda 1 / (sd / mean_)
 
   report random-gamma alpha lambda
 end
 
+to-report calc-random-normal-with-abs [mean_ sd]
+  report abs random-normal mean_ sd
+end
+
 to-report mutate-habitat-spec [hab-spec]
   let new-habitat-spec [0 0 0 0]
-  let total-sum-of-random-gamma 0
+  let total-sum-of-random 0
   let i 0
   while [i < num-of-patch-types]
   [
-    let new-random-gamma calc-random-gamma-from-mean-and-sv item i hab-spec mutation-size-habitat-spec
-    set new-habitat-spec replace-item i new-habitat-spec new-random-gamma
-    set total-sum-of-random-gamma total-sum-of-random-gamma + new-random-gamma
+    let new-random 0
+    ifelse gamma?
+    [set new-random calc-random-gamma-from-mean-and-sv item i hab-spec mutation-size-habitat-spec]
+    [set new-random calc-random-normal-with-abs item i hab-spec mutation-size-habitat-spec]
+
+    set new-habitat-spec replace-item i new-habitat-spec new-random
+    set total-sum-of-random total-sum-of-random + new-random
     set i i + 1
   ]
+  set i 0
   while [i < num-of-patch-types]
   [
-    set new-habitat-spec replace-item i new-habitat-spec  ( item i new-habitat-spec / total-sum-of-random-gamma )
+    set new-habitat-spec replace-item i new-habitat-spec  ( item i new-habitat-spec / total-sum-of-random )
     set i i + 1
   ]
 
@@ -636,7 +650,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-11.0
+541.0
 10
 1
 NIL
@@ -999,7 +1013,7 @@ mutation-size-fecundity
 mutation-size-fecundity
 0
 5
-0.4
+0.21
 0.01
 1
 NIL
@@ -1140,7 +1154,7 @@ indirect-event-frequency
 indirect-event-frequency
 0
 1
-1.0
+0.06
 0.01
 1
 NIL
@@ -1170,7 +1184,7 @@ indirect-event-coverage
 indirect-event-coverage
 0
 1
-0.6
+0.25
 0.01
 1
 NIL
@@ -1215,7 +1229,7 @@ indirect-event-clustering
 indirect-event-clustering
 0.000
 1
-0.047
+0.418
 0.001
 1
 NIL
@@ -1309,7 +1323,7 @@ INPUTBOX
 starting-habitat-spec
 0.5,0.5,0,0
 1
-0
+1
 String
 
 INPUTBOX
@@ -1721,11 +1735,40 @@ mutation-size-habitat-spec
 mutation-size-habitat-spec
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
 HORIZONTAL
+
+PLOT
+718
+635
+918
+785
+specialization for resource type 1
+NIL
+NIL
+0.0
+1.01
+0.0
+10.0
+true
+false
+"set-plot-pen-mode 1\nset-plot-pen-interval 0.01" ""
+PENS
+"default" 1.0 0 -16777216 true "" "histogram [item 0 habitat-spec] of turtles"
+
+SWITCH
+1105
+765
+1208
+798
+gamma?
+gamma?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
