@@ -97,6 +97,8 @@ turtles-own[
 
   ;stats
   lineage-identity
+  standardized-mear
+  standardized-etr
 
   realized-maturity-age
   realized-fecundity
@@ -158,13 +160,14 @@ to setup
   [
 
     ; FOCAL TRAITS
+    set color blue
     set body-size starting-body-size
     set interbirth-interval starting-interbirth-interval
     set fecundity starting-fecundity
     set maturity-age starting-maturity-age
     set longevity maturity-longevity-coefficient * maturity-age
     ;set habitat-spec csv:from-row starting-habitat-spec
-    set habitat-spec one-of [[0.5 0.5 0 0] [1 0 0 0]]
+    set habitat-spec [1 0 0 0]
     set sexual? starting-sexual?
     set disp-ability starting-disp-ability
     set disp-stage csv:from-row starting-disp-stage
@@ -190,6 +193,9 @@ to setup
     ; STATS AND VISUALIZATION
     set lineage-identity who
     set size (body-size / 100)
+
+    set standardized-mear min-energy-after-reprod / (body-size)
+    set standardized-etr energy-to-reproduce / (body-size)
   ]
 
 end
@@ -282,6 +288,7 @@ to update-perturbations
           ]
         ]
         set under-d-perturbation? false
+        set pcolor base-color
       ]
     ]
   ]
@@ -396,12 +403,12 @@ to agents-go
   ifelse age > maturity-age
   [
     if energy > energy-to-reproduce [
-      if ticks-since-last-reproduction > interbirth-interval
-      [
+      ;if ticks-since-last-reproduction > interbirth-interval
+      ;[
       reproduce
       set realized-interbirth-interval ticks-since-last-reproduction
       set ticks-since-last-reproduction -1 ; -1 because below we add +1
-      ]
+      ;]
       ]
   ]
   ;else
@@ -414,6 +421,7 @@ to agents-go
 
   ; die of old age
   if random age > longevity [die]
+  if energy < 0 [die]
 end
 
 to eat
@@ -509,15 +517,15 @@ to reproduce
     hatch 1 [
       set energy (energy_to_offspring / [fecundity] of myself)
       set age 0
-      set body-size random-normal [body-size] of myself ([body-size] of myself * mutation-size)
-      set interbirth-interval random-normal [interbirth-interval] of myself ([interbirth-interval] of myself * mutation-size)
+      set body-size random-normal [body-size] of myself ([body-size] of myself * mutation-size-body-size)
+      set interbirth-interval random-normal [interbirth-interval] of myself ([interbirth-interval] of myself * mutation-size-interbirth-interval)
       set fecundity  random-normal [fecundity] of myself ([fecundity] of myself * mutation-size-fecundity)
       if fecundity < 1 [set fecundity 1]
-      set maturity-age random-normal [maturity-age] of myself ([maturity-age] of myself * mutation-size)
+      set maturity-age random-normal [maturity-age] of myself ([maturity-age] of myself * mutation-size-maturity-age)
       set longevity maturity-longevity-coefficient * maturity-age
       set habitat-spec mutate-habitat-spec [habitat-spec] of myself
       ;set sexual?
-      set disp-ability random-normal [disp-ability] of myself ([disp-ability] of myself * mutation-size)
+      set disp-ability random-normal [disp-ability] of myself ([disp-ability] of myself * mutation-size-dispersal-ability)
       ;set disp-stage
       ;set climate-optimum
       ;set climate-sd
@@ -529,13 +537,18 @@ to reproduce
       set basal-resource-intake starting-basal-resource-intake * (body-size ^ metabolic-allometric-exponent)
 
       ; BODY-SIZE SCALING TRAITS (but not allometrically
-      set energy-to-reproduce starting-ratio-energy-to-reproduce * (body-size ^ metabolic-allometric-exponent)
-      set min-energy-after-reprod starting-ratio-min-energy-after-reprod * (body-size ^ metabolic-allometric-exponent)
+      set energy-to-reproduce random-normal [energy-to-reproduce] of myself ([energy-to-reproduce] of myself * mutation-size-etr)
+      set min-energy-after-reprod random-normal [min-energy-after-reprod] of myself ([min-energy-after-reprod] of myself * mutation-size-mear)
+
       set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
-      set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
+      set reproduction-cost reproductive-cost * (body-size)
 
       ; STATS AND VISUALIZATION
       set lineage-identity who
+
+      set standardized-etr energy-to-reproduce / (body-size )
+      set standardized-mear min-energy-after-reprod / (body-size)
+
       set size (body-size / 100)
 
     ]
@@ -590,13 +603,13 @@ to reset-patch-colors
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-644
-235
-982
-574
+599
+184
+1102
+688
 -1
 -1
-10.0
+15.0
 1
 10
 1
@@ -617,20 +630,20 @@ ticks
 30.0
 
 TEXTBOX
-1786
-20
-1936
+2273
 38
+2423
+56
 Map generator
 11
 0.0
 1
 
 SLIDER
-1781
-43
-1953
-76
+2268
+61
+2440
+94
 num-of-patch-types
 num-of-patch-types
 1
@@ -642,25 +655,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-1779
-79
-1958
-112
+2266
+97
+2445
+130
 num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-541.0
+51.0
 10
 1
 NIL
 HORIZONTAL
 
 BUTTON
-996
-469
-1059
-502
+1106
+487
+1169
+520
 NIL
 setup
 NIL
@@ -674,10 +687,10 @@ NIL
 1
 
 BUTTON
-995
-503
-1058
-536
+1105
+521
+1168
+554
 go
 go
 NIL
@@ -691,10 +704,10 @@ NIL
 1
 
 BUTTON
-995
-536
-1058
-569
+1105
+554
+1168
+587
 NIL
 go
 T
@@ -708,10 +721,10 @@ NIL
 1
 
 MONITOR
-690
-65
-773
-110
+1411
+239
+1494
+284
 NIL
 count turtles
 17
@@ -719,10 +732,10 @@ count turtles
 11
 
 PLOT
-2
-481
-202
-631
+306
+138
+583
+357
 mean body-size
 NIL
 NIL
@@ -738,10 +751,10 @@ PENS
 "lower sd" 1.0 0 -2674135 true "" "plot median [body-size] of turtles"
 
 PLOT
-4
-631
-202
-781
+303
+665
+501
+815
 mean fecundity
 NIL
 NIL
@@ -757,10 +770,10 @@ PENS
 "pen-1" 1.0 0 -7500403 true "" "plot median [fecundity] of turtles"
 
 MONITOR
-685
-17
-787
-62
+1406
+191
+1508
+236
 green patches
 count patches with [pcolor = green]
 17
@@ -768,10 +781,10 @@ count patches with [pcolor = green]
 11
 
 PLOT
-433
-130
-633
-280
+93
+211
+293
+361
 Number of organisms
 NIL
 NIL
@@ -786,10 +799,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles"
 
 PLOT
-2
-329
-202
-479
+96
+666
+296
+816
 mean maturity-age
 NIL
 NIL
@@ -804,10 +817,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [maturity-age] of turtles"
 
 PLOT
-3
-30
-203
-180
+206
+915
+406
+1065
 mean dispersal ability
 NIL
 NIL
@@ -822,10 +835,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [disp-ability] of turtles"
 
 PLOT
-1000
-247
-1200
-397
+1121
+182
+1321
+332
 mean age
 NIL
 NIL
@@ -838,13 +851,12 @@ true
 "" ""
 PENS
 "mean" 1.0 0 -16777216 true "" "plot mean [age] of turtles"
-"max" 1.0 0 -7500403 true "" "plot max [age] of turtles"
 
 PLOT
-996
-578
-1196
-728
+1358
+602
+1558
+752
 histogram of body sizes
 body size value
 NIL
@@ -859,10 +871,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 SWITCH
-991
+1509
+368
+1757
 401
-1239
-434
 patch-color-scales-with-resources?
 patch-color-scales-with-resources?
 1
@@ -870,10 +882,10 @@ patch-color-scales-with-resources?
 -1000
 
 PLOT
-1122
-434
-1322
-584
+1548
+443
+1748
+593
 histogram of fecundity
 fecundity
 NIL
@@ -888,25 +900,25 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
 
 SLIDER
-1573
-766
-1773
-799
+1929
+783
+2129
+816
 resource-perception-radius
 resource-perception-radius
 0
 5
-1.0
+2.0
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-1257
-55
-1389
-88
+1745
+72
+1877
+105
 big-move-first?
 big-move-first?
 0
@@ -914,39 +926,21 @@ big-move-first?
 -1000
 
 SWITCH
-1257
-88
-1389
-121
+1745
+105
+1877
+138
 random-walk?
 random-walk?
-1
+0
 1
 -1000
 
-PLOT
-3
-179
-203
-329
-mean interbirth-interval
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [interbirth-interval] of turtles"
-
 BUTTON
-995
+1513
+404
+1613
 437
-1095
-470
 reset patch colors
 reset-patch-colors
 NIL
@@ -960,25 +954,25 @@ NIL
 1
 
 SLIDER
-1257
-251
-1429
-284
+2268
+388
+2440
+421
 mutation-size
 mutation-size
 0
 0.5
-0.05
+0.0
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1257
-120
-1470
-153
+1745
+137
+1958
+170
 maturity-longevity-coefficient
 maturity-longevity-coefficient
 1
@@ -990,41 +984,41 @@ NIL
 HORIZONTAL
 
 SLIDER
-1257
-217
-1435
-250
+1745
+234
+1923
+267
 reproductive-cost
 reproductive-cost
 0
 1
-0.15
+0.1
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1256
-284
-1436
-317
+2267
+421
+2447
+454
 mutation-size-fecundity
 mutation-size-fecundity
 0
 5
-0.21
+0.0
 0.01
 1
 NIL
 HORIZONTAL
 
 PLOT
-433
-432
-633
-582
-total energy
+93
+513
+293
+663
+mean energy
 NIL
 NIL
 0.0
@@ -1035,13 +1029,14 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot sum [energy] of turtles"
+"default" 1.0 0 -16777216 true "" "plot mean [energy] of turtles"
+"pen-1" 1.0 0 -7500403 true "" "plot min [energy] of turtles"
 
 PLOT
-433
-281
-633
-431
+93
+362
+293
+512
 total resources
 NIL
 NIL
@@ -1056,10 +1051,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
 
 PLOT
-1198
-578
-1399
-728
+1554
+595
+1755
+745
 small body size hist
 NIL
 NIL
@@ -1074,71 +1069,71 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
 
 TEXTBOX
-871
-38
-1021
-56
+1389
+28
+1539
+46
 indirect event
 11
 0.0
 1
 
 TEXTBOX
-1055
-37
-1205
-55
+1573
+27
+1723
+45
 direct event
 11
 0.0
 1
 
 SLIDER
-1024
-56
-1203
-89
+1542
+46
+1721
+79
 direct-event-frequency
 direct-event-frequency
 0
 1
-0.06
+1.0
 0.01
 1
 NIL
 HORIZONTAL
 
 SWITCH
-1026
-186
-1174
-219
+1104
+437
+1228
+470
 direct-event?
 direct-event?
-1
+0
 1
 -1000
 
 SLIDER
-1024
-89
-1199
-122
+1542
+79
+1717
+112
 direct-event-amplitude
 direct-event-amplitude
 0.01
 1
-0.62
+0.01
 0.01
 1
 NIL
 HORIZONTAL
 
 SWITCH
-831
-191
-988
-224
+1104
+405
+1228
+438
 indirect-event?
 indirect-event?
 1
@@ -1146,25 +1141,25 @@ indirect-event?
 -1000
 
 SLIDER
-830
-57
-1018
-90
+1348
+47
+1536
+80
 indirect-event-frequency
 indirect-event-frequency
 0
 1
-0.06
+1.0
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-831
-90
-1016
-123
+1349
+80
+1534
+113
 indirect-event-amplitude
 indirect-event-amplitude
 0.01
@@ -1176,71 +1171,71 @@ NIL
 HORIZONTAL
 
 SLIDER
-830
-126
-1014
-159
+1348
+116
+1532
+149
 indirect-event-coverage
 indirect-event-coverage
 0
 1
-0.25
+0.6
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1025
-120
-1199
-153
+1543
+110
+1717
+143
 direct-event-coverage
 direct-event-coverage
 0
 1
-0.81
+0.6
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1025
-153
-1200
-186
+1543
+143
+1718
+176
 direct-event-clustering
 direct-event-clustering
 0
 1
-0.34
+0.03
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-830
-157
-1015
-190
+1348
+147
+1533
+180
 indirect-event-clustering
 indirect-event-clustering
 0.000
 1
-0.418
+0.034
 0.001
 1
 NIL
 HORIZONTAL
 
 PLOT
-203
-330
-403
-480
-mean realized rep age
+306
+513
+581
+663
+age at first reproduction
 NIL
 NIL
 0.0
@@ -1254,11 +1249,11 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [realized-maturity-age] of turtles"
 
 PLOT
-203
-179
-403
-329
-mean realized-interbirth-interval
+306
+362
+582
+512
+interbirth interval
 NIL
 NIL
 0.0
@@ -1272,21 +1267,21 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [realized-interbirth-interval] of turtles"
 
 INPUTBOX
-1619
-423
-1709
-483
+1975
+440
+2065
+500
 starting-body-size
-80.0
+70.0
 1
 0
 Number
 
 INPUTBOX
-1712
-424
-1839
-484
+2068
+441
+2195
+501
 starting-interbirth-interval
 10.0
 1
@@ -1294,10 +1289,10 @@ starting-interbirth-interval
 Number
 
 INPUTBOX
-1522
-423
-1617
-483
+1878
+440
+1973
+500
 starting-fecundity
 1.0
 1
@@ -1305,43 +1300,43 @@ starting-fecundity
 Number
 
 INPUTBOX
-1402
-423
-1518
-483
+1758
+440
+1874
+500
 starting-maturity-age
-20.0
+65.0
 1
 0
 Number
 
 INPUTBOX
-1504
-362
-1631
-422
+1860
+379
+1987
+439
 starting-habitat-spec
-0.5,0.5,0,0
+1,0,0,0
 1
 1
 String
 
 INPUTBOX
-1634
-362
-1733
-422
+1990
+379
+2089
+439
 starting-disp-ability
-2.0
+1.2
 1
 0
 Number
 
 INPUTBOX
-1402
-362
-1502
-422
+1758
+379
+1858
+439
 starting-disp-stage
 1,1
 1
@@ -1349,10 +1344,10 @@ starting-disp-stage
 String
 
 SWITCH
-1402
-484
-1546
-517
+1758
+501
+1902
+534
 starting-sexual?
 starting-sexual?
 1
@@ -1360,10 +1355,10 @@ starting-sexual?
 -1000
 
 INPUTBOX
-1652
-570
-1739
-630
+2008
+587
+2095
+647
 starting-energy
 0.2
 1
@@ -1371,10 +1366,10 @@ starting-energy
 Number
 
 INPUTBOX
-1652
-509
-1807
-569
+2008
+526
+2163
+586
 starting-age
 5.0
 1
@@ -1382,21 +1377,21 @@ starting-age
 Number
 
 INPUTBOX
-1405
-600
-1504
-660
+1761
+617
+1860
+677
 starting-basal-dispersal-cost-per-unit
-0.02
+0.01
 1
 0
 Number
 
 INPUTBOX
-1405
-661
-1518
-721
+1761
+678
+1874
+738
 starting-basal-growth-cost-per-tick
 0.02
 1
@@ -1404,10 +1399,10 @@ starting-basal-growth-cost-per-tick
 Number
 
 INPUTBOX
-1405
-540
-1539
-600
+1761
+557
+1895
+617
 starting-basal-homeostasis-cost-per-tick
 0.02
 1
@@ -1415,10 +1410,10 @@ starting-basal-homeostasis-cost-per-tick
 Number
 
 INPUTBOX
-1405
-722
-1525
-782
+1761
+739
+1881
+799
 starting-basal-resource-intake
 0.1
 1
@@ -1426,10 +1421,10 @@ starting-basal-resource-intake
 Number
 
 INPUTBOX
-1652
-642
-1816
-702
+2008
+659
+2172
+719
 starting-ratio-energy-to-reproduce
 0.67
 1
@@ -1437,10 +1432,10 @@ starting-ratio-energy-to-reproduce
 Number
 
 INPUTBOX
-1652
-702
-1807
-762
+2008
+719
+2163
+779
 starting-ratio-min-energy-after-reprod
 0.33
 1
@@ -1448,10 +1443,10 @@ starting-ratio-min-energy-after-reprod
 Number
 
 INPUTBOX
-1390
-56
-1473
-116
+1878
+73
+1961
+133
 starting-no
 100.0
 1
@@ -1459,10 +1454,10 @@ starting-no
 Number
 
 INPUTBOX
-1651
-45
-1767
-105
+2139
+62
+2255
+122
 starting-resources
 2.0
 1
@@ -1470,21 +1465,21 @@ starting-resources
 Number
 
 INPUTBOX
-1651
-105
-1768
-165
+2139
+122
+2256
+182
 starting-max-resources
-6.0
+2.0
 1
 0
 Number
 
 INPUTBOX
-1650
-166
-1768
-226
+2138
+183
+2256
+243
 starting-resource-regen
 2.0
 1
@@ -1492,10 +1487,10 @@ starting-resource-regen
 Number
 
 INPUTBOX
-1477
-53
-1555
-113
+1965
+70
+2043
+130
 min-xcor
 -16.0
 1
@@ -1503,10 +1498,10 @@ min-xcor
 Number
 
 INPUTBOX
-1556
-53
-1635
-113
+2044
+70
+2123
+130
 max-xcor
 16.0
 1
@@ -1514,10 +1509,10 @@ max-xcor
 Number
 
 INPUTBOX
-1477
-114
-1555
-174
+1965
+131
+2043
+191
 min-ycor
 -16.0
 1
@@ -1525,10 +1520,10 @@ min-ycor
 Number
 
 INPUTBOX
-1556
-114
-1634
-174
+2044
+131
+2122
+191
 max-ycor
 16.0
 1
@@ -1536,21 +1531,21 @@ max-ycor
 Number
 
 INPUTBOX
-1477
-174
-1555
-234
+1965
+191
+2043
+251
 patch-n-pixels
-10.0
+15.0
 1
 0
 Number
 
 INPUTBOX
-1257
-155
-1361
-215
+1745
+172
+1849
+232
 metabolic-allometric-exponent
 0.75
 1
@@ -1558,10 +1553,10 @@ metabolic-allometric-exponent
 Number
 
 INPUTBOX
-1362
-155
-1466
-215
+1850
+172
+1954
+232
 stand-dev-to-body-size
 1.0
 1
@@ -1569,97 +1564,80 @@ stand-dev-to-body-size
 Number
 
 TEXTBOX
-1269
-32
-1419
-50
+1757
+49
+1907
+67
 world
 11
 0.0
 1
 
 TEXTBOX
-1483
-36
-1633
-54
+1971
+53
+2121
+71
 world dimensions
 11
 0.0
 1
 
 TEXTBOX
-1659
-25
-1757
-43
+2147
+42
+2245
+60
 Patches
 11
 0.0
 1
 
 TEXTBOX
-1410
-330
-1560
-348
+1766
+347
+1916
+365
 ORGANISM TRAITS\t\n
 11
 0.0
 1
 
 TEXTBOX
-1411
-346
-1561
-364
+1767
+363
+1917
+381
 focal traits
 11
 0.0
 1
 
 TEXTBOX
-1670
-493
-1820
-511
+2026
+510
+2176
+528
 starting age and energy
 11
 0.0
 1
 
 TEXTBOX
-1407
-523
-1575
-551
+1763
+540
+1931
+568
 energy expenditure and uptake
 11
 0.0
 1
 
-BUTTON
-693
-586
-756
-619
-NIL
-stop
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 SLIDER
-1473
-240
-1659
-273
+2273
+165
+2459
+198
 mutation-size-body-size
 mutation-size-body-size
 0
@@ -1671,55 +1649,55 @@ NIL
 HORIZONTAL
 
 SLIDER
-1473
-272
-1659
-305
+2273
+197
+2459
+230
 mutation-size-dispersal-ability
 mutation-size-dispersal-ability
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1659
-240
-1857
-273
+2271
+229
+2469
+262
 mutation-size-interbirth-interval
 mutation-size-interbirth-interval
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1658
-272
-1858
-305
+2270
+261
+2470
+294
 mutation-size-maturity-age
 mutation-size-maturity-age
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
 HORIZONTAL
 
 INPUTBOX
-380
-655
-566
-790
+638
+845
+824
+980
 snapshot-at
 0\n50000\n51000\n52000\n100000\n101000\n102000\n103000
 1
@@ -1727,10 +1705,10 @@ snapshot-at
 String
 
 SLIDER
-1559
-321
-1756
-354
+2271
+359
+2468
+392
 mutation-size-habitat-spec
 mutation-size-habitat-spec
 0
@@ -1742,10 +1720,10 @@ NIL
 HORIZONTAL
 
 PLOT
-718
-635
-918
-785
+811
+836
+1011
+986
 specialization for resource type 1
 NIL
 NIL
@@ -1760,15 +1738,117 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [item 0 habitat-spec] of turtles"
 
 SWITCH
-1105
-765
-1208
-798
+1461
+782
+1564
+815
 gamma?
 gamma?
 1
 1
 -1000
+
+SLIDER
+2270
+294
+2442
+327
+mutation-size-mear
+mutation-size-mear
+0
+1
+0.0
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+2270
+327
+2442
+360
+mutation-size-etr
+mutation-size-etr
+0
+1
+0.0
+0.01
+1
+NIL
+HORIZONTAL
+
+PLOT
+702
+988
+902
+1138
+mear
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [standardized-mear] of turtles"
+
+PLOT
+429
+834
+629
+984
+etr
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [standardized-etr] of turtles"
+
+PLOT
+625
+685
+825
+835
+total energy
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [energy] of turtles"
+
+PLOT
+1117
+716
+1317
+866
+histogram of energy
+NIL
+NIL
+-5.0
+70.0
+0.0
+10.0
+true
+false
+"set-plot-pen-mode 1\nset-plot-pen-interval 0.1" ""
+PENS
+"default" 1.0 0 -16777216 true "" "histogram [energy] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -2112,7 +2192,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
