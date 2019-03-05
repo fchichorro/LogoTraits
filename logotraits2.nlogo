@@ -160,7 +160,7 @@ to setup
   [
 
     ; FOCAL TRAITS
-    set color blue
+    set color yellow
     set body-size starting-body-size
     set interbirth-interval starting-interbirth-interval
     set fecundity starting-fecundity
@@ -192,6 +192,7 @@ to setup
 
     ; STATS AND VISUALIZATION
     set lineage-identity who
+    set color scale-color yellow energy 0 (body-size)
     set size (body-size / 100)
 
     set standardized-mear min-energy-after-reprod / (body-size)
@@ -422,6 +423,7 @@ to agents-go
   ; die of old age
   if random age > longevity [die]
   if energy < 0 [die]
+  set color scale-color yellow energy 0 (body-size)
 end
 
 to eat
@@ -549,6 +551,7 @@ to reproduce
       set standardized-etr energy-to-reproduce / (body-size )
       set standardized-mear min-energy-after-reprod / (body-size)
 
+      set color scale-color yellow energy 0 (body-size)
       set size (body-size / 100)
 
     ]
@@ -1305,7 +1308,7 @@ INPUTBOX
 1874
 500
 starting-maturity-age
-65.0
+40.0
 1
 0
 Number
