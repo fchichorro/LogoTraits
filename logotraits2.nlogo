@@ -1,5 +1,6 @@
 extensions[ csv ]
 
+
 globals[
   ; LANDSCAPE GENERATION
   ; num-of-seeds-per-type
@@ -385,15 +386,19 @@ end
 
 to agents-go
   ;if agents don't have enough energy to cover losses they die
-
   ifelse random-walk?
   [ disperse]
   ;else
   [
-    let energy-income get-energy-income
-    let mean-energy-incomes get-mean-energy-incomes
-    if (energy-income = 0) or (energy-income < mean-energy-incomes) [
-      disperse
+    ifelse forage?
+    [forage]
+    ;else
+    [
+      let energy-income get-energy-income patch-here
+      let mean-energy-incomes get-mean-energy-incomes
+      if (energy-income = 0) or (energy-income < mean-energy-incomes) [
+        disperse
+      ]
     ]
   ]
   if energy < 0 [die]
@@ -475,10 +480,10 @@ to-report get-mean-energy-incomes
   report mean-energy-income
 end
 
-to-report get-energy-income
+to-report get-energy-income [ptch]
   ;get energy income if agent eats in current patch
   let energy-income 0
-  ask patch-here [
+  ask ptch [
     ifelse resources > [basal-resource-intake] of myself
     [
       ;multiply basal-resource intake by the habitat spec value
@@ -604,6 +609,28 @@ to reset-patch-colors
     set pcolor base-color
   ]
 end
+
+to forage ;forage by going to the best cell available, or just disperse when all cells around have no resources
+  let p max-one-of patches in-radius disp-ability [resources]
+  let potential-income-of-this-patch  get-energy-income patch-here
+  let potential-income-of-new-patch get-energy-income p
+
+  let potential-dispersal-distance distance p
+  let potential-dispersal-cost potential-dispersal-distance * basal-dispersal-cost-per-unit
+
+  ifelse potential-income-of-this-patch = 0  and potential-income-of-new-patch = 0 ;move even if it hurts energy if there is no possible outcome in the cells around
+    [
+      disperse
+  ]
+  ;else
+  [
+    if potential-income-of-new-patch - potential-dispersal-cost > potential-income-of-this-patch and energy > potential-dispersal-cost [
+      face p
+      move-to p
+    ]
+  ]
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 599
@@ -929,13 +956,13 @@ big-move-first?
 -1000
 
 SWITCH
-1745
-105
-1877
-138
+1848
+267
+1980
+300
 random-walk?
 random-walk?
-0
+1
 1
 -1000
 
@@ -1113,7 +1140,7 @@ SWITCH
 470
 direct-event?
 direct-event?
-0
+1
 1
 -1000
 
@@ -1126,7 +1153,7 @@ direct-event-amplitude
 direct-event-amplitude
 0.01
 1
-0.01
+0.03
 0.01
 1
 NIL
@@ -1852,6 +1879,17 @@ false
 "set-plot-pen-mode 1\nset-plot-pen-interval 0.1" ""
 PENS
 "default" 1.0 0 -16777216 true "" "histogram [energy] of turtles"
+
+SWITCH
+1746
+267
+1849
+300
+forage?
+forage?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
