@@ -137,6 +137,7 @@ to set-world-parameters
 end
 
 to setup
+  random-seed 55
   clear-all
   reset-ticks
   set-world-parameters
@@ -265,7 +266,7 @@ to update-perturbations
       [
         set under-d-perturbation? true
         set patches-altered patches-altered + 1
-        set pcolor red
+
         if patches-altered > max-patches-altered
         [stop]
       ]
@@ -276,7 +277,7 @@ to update-perturbations
             ask one-of neighbors with [under-d-perturbation? = false] [
               set under-d-perturbation? true
               set patches-altered patches-altered + 1
-              set pcolor red
+
             ]
           ]
         ]
@@ -307,7 +308,8 @@ to update-perturbations
         let max-patches-altered ceiling (indirect-event-coverage * count patches)
         ask n-of ceiling (max-patches-altered - (max-patches-altered * indirect-event-clustering) + 1) patches
         [
-          set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
+          ;set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
+          set pcolor brown
           set max-resources (max-resources - max-resources * indirect-event-amplitude)
           set resources (resources - resources * indirect-event-amplitude)
           set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
@@ -323,7 +325,8 @@ to update-perturbations
             ask one-of patches with [under-i-perturbation? = true]
             [
               ask one-of neighbors with [under-i-perturbation? = false] [
-                set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
+                ;set pcolor scale-color item resource-type patch-palette indirect-event-amplitude 1 -1
+                set pcolor brown
                 set max-resources (max-resources - max-resources * indirect-event-amplitude)
                 set resources (resources - resources * indirect-event-amplitude)
                 set resource-regen (resource-regen - resource-regen * indirect-event-amplitude)
@@ -359,10 +362,9 @@ to update-perturbations
 end
 
 to regen-resources
-  if resources < max-resources
-  [
-    set resources resources + resource-regen
-  ]
+
+  set resources resources + resource-regen
+
   if resources > max-resources
   [
     set resources max-resources
@@ -441,8 +443,8 @@ to eat
       ;multiply basal-resource intake by the habitat spec value
       set energy-income [basal-resource-intake] of myself *
       item resource-type [habitat-spec] of myself
-      set resources resources - [basal-resource-intake] of myself
-      ;set resources resources - energy-income
+      ;set resources resources - [basal-resource-intake] of myself
+      set resources resources - energy-income
 
     ]
     [
@@ -525,6 +527,7 @@ to reproduce
       set energy (energy_to_offspring / [fecundity] of myself)
       set age 0
       set body-size random-normal [body-size] of myself ([body-size] of myself * mutation-size-body-size)
+      if body-size < 0 [set body-size 0.1]
       set interbirth-interval random-normal [interbirth-interval] of myself ([interbirth-interval] of myself * mutation-size-interbirth-interval)
       set fecundity  random-normal [fecundity] of myself ([fecundity] of myself * mutation-size-fecundity)
       if fecundity < 1 [set fecundity 1]
@@ -548,7 +551,7 @@ to reproduce
       set min-energy-after-reprod random-normal [min-energy-after-reprod] of myself ([min-energy-after-reprod] of myself * mutation-size-mear)
 
       set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
-      set reproduction-cost reproductive-cost * (body-size)
+      set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
 
       ; STATS AND VISUALIZATION
       set lineage-identity who
@@ -762,29 +765,28 @@ count turtles
 11
 
 PLOT
-306
-138
-583
-357
+320
+208
+597
+427
 mean body-size
 NIL
 NIL
 0.0
 10.0
 30.0
-120.0
+50.0
 true
 false
 "" ""
 PENS
 "mean" 1.0 0 -16777216 true "let mean-bs mean [body-size] of turtles" "plot mean [body-size] of turtles"
-"lower sd" 1.0 0 -2674135 true "" "plot median [body-size] of turtles"
 
 PLOT
-303
-665
-501
-815
+243
+784
+441
+934
 mean fecundity
 NIL
 NIL
@@ -811,10 +813,10 @@ count patches with [pcolor = green]
 11
 
 PLOT
-93
-211
-293
-361
+-2
+608
+198
+758
 Number of organisms
 NIL
 NIL
@@ -829,10 +831,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles"
 
 PLOT
-96
-666
-296
-816
+1
+1063
+201
+1213
 mean maturity-age
 NIL
 NIL
@@ -1044,10 +1046,10 @@ NIL
 HORIZONTAL
 
 PLOT
-93
-513
-293
-663
+-2
+910
+198
+1060
 mean energy
 NIL
 NIL
@@ -1063,10 +1065,10 @@ PENS
 "pen-1" 1.0 0 -7500403 true "" "plot min [energy] of turtles"
 
 PLOT
-93
-362
-293
-512
+-2
+759
+198
+909
 total resources
 NIL
 NIL
@@ -1081,11 +1083,11 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
 
 PLOT
-1554
-595
-1755
-745
-small body size hist
+321
+427
+597
+625
+body-size histogram
 NIL
 NIL
 0.0
@@ -1127,7 +1129,7 @@ direct-event-frequency
 direct-event-frequency
 0
 1
-1.0
+0.05
 0.01
 1
 NIL
@@ -1140,7 +1142,7 @@ SWITCH
 470
 direct-event?
 direct-event?
-1
+0
 1
 -1000
 
@@ -1153,7 +1155,7 @@ direct-event-amplitude
 direct-event-amplitude
 0.01
 1
-0.03
+1.0
 0.01
 1
 NIL
@@ -1209,7 +1211,7 @@ indirect-event-coverage
 indirect-event-coverage
 0
 1
-0.6
+0.7
 0.01
 1
 NIL
@@ -1224,7 +1226,7 @@ direct-event-coverage
 direct-event-coverage
 0
 1
-0.6
+0.25
 0.01
 1
 NIL
@@ -1239,7 +1241,7 @@ direct-event-clustering
 direct-event-clustering
 0
 1
-0.03
+0.93
 0.01
 1
 NIL
@@ -1254,17 +1256,17 @@ indirect-event-clustering
 indirect-event-clustering
 0.000
 1
-0.034
+0.088
 0.001
 1
 NIL
 HORIZONTAL
 
 PLOT
-306
-513
-581
-663
+1288
+463
+1563
+613
 age at first reproduction
 NIL
 NIL
@@ -1279,10 +1281,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [realized-maturity-age] of turtles"
 
 PLOT
-306
-362
-582
-512
+1288
+312
+1564
+462
 interbirth interval
 NIL
 NIL
@@ -1302,7 +1304,7 @@ INPUTBOX
 2065
 500
 starting-body-size
-70.0
+30.0
 1
 0
 Number
@@ -1500,7 +1502,7 @@ INPUTBOX
 2256
 182
 starting-max-resources
-2.0
+4.0
 1
 0
 Number
@@ -1845,10 +1847,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [standardized-etr] of turtles"
 
 PLOT
-625
-685
-825
-835
+641
+721
+841
+871
 total energy
 NIL
 NIL
@@ -1887,7 +1889,7 @@ SWITCH
 300
 forage?
 forage?
-0
+1
 1
 -1000
 
