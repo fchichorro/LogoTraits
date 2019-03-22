@@ -10,58 +10,7 @@ globals[
   ; PATCHES
   ; PATCHES PARAMETERS
   ;
-  starting-resources-min
-  starting-resources-max
-  resource-regen-min
-  resource-regen-max
-  max-resources-min
-  max-resources-max
 
-  ; ORGANISMS
-  ; POPULATION LEVEL PARAMETERS
-  males-per-female
-
-  ; FOCAL TRAITS
-  body-size-max
-  body-size-min
-  interbirth-interval-max
-  interbirth-interval-min
-  fecundity-max
-  fecundity-min
-  maturity-age-max
-  maturity-age-min
-  longevity-max
-  longevity-min
-  habitat-spec-max
-  habitat-spec-min
-  sexual?-max
-  sexual?-min
-  disp-ability-max
-  disp-ability-min
-  disp-stage-max
-  disp-stage-min
-  climate-optimum-max
-  climate-optimum-min
-  climate-sd-max
-  climate-sd-min
-
-  ; NON-FOCAL TRAITS
-  starting-energy-max
-  starting-energy-min
-  starting-age-max
-  starting-age-min
-  basal-dispersal-cost-per-unit-max
-  basal-dispersal-cost-per-unit-min
-  basal-growth-cost-per-tick-max
-  basal-growth-cost-per-tick-min
-  basal-homeostasis-cost-per-tick-max
-  basal-homeostasis-cost-per-tick-min
-  basal-resource-intake-max
-  basal-resource-intake-min
-  ratio-energy-to-reproduce-min
-  ratio-energy-to-reproduce-max
-  ratio-min-energy-after-reprod-min
-  ratio-min-energy-after-reprod-max
 
   ; in test
   ;mortality-rate
@@ -92,13 +41,13 @@ turtles-own[
   basal-homeostasis-cost-per-tick
   basal-resource-intake
   energy-to-reproduce
-  min-energy-after-reprod
+  energy-after-reprod
   ticks-since-last-reproduction
   reproduction-cost
 
   ;stats
   lineage-identity
-  standardized-mear
+  standardized-ear
   standardized-etr
 
   realized-maturity-age
@@ -137,7 +86,7 @@ to set-world-parameters
 end
 
 to setup
-  random-seed 55
+  ;random-seed 55
   clear-all
   reset-ticks
   set-world-parameters
@@ -188,7 +137,7 @@ to setup
 
     ; BODY-SIZE SCALING TRAITS (but not allometrically
     set energy-to-reproduce starting-ratio-energy-to-reproduce * (body-size ^ metabolic-allometric-exponent)
-    set min-energy-after-reprod starting-ratio-min-energy-after-reprod * (body-size ^ metabolic-allometric-exponent)
+    set energy-after-reprod starting-ratio-energy-after-reprod * (body-size ^ metabolic-allometric-exponent)
     set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
     set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
 
@@ -197,7 +146,7 @@ to setup
     set color scale-color yellow energy 0 (body-size)
     set size (body-size / 100)
 
-    set standardized-mear min-energy-after-reprod / (body-size)
+    set standardized-ear energy-after-reprod / (body-size)
     set standardized-etr energy-to-reproduce / (body-size)
   ]
 
@@ -462,7 +411,7 @@ to-report get-mean-energy-incomes
   ;calculate the energy income of a patch
   let mean-energy-income 0
   let num-patches 0
-  ask [patches in-radius resource-perception-radius] of patch-here [
+  ask [patches in-radius disp-ability] of myself [
     ifelse resources > [basal-resource-intake] of myself
     [
       ;multiply basal-resource intake by the habitat spec value
@@ -516,9 +465,9 @@ to disperse
 end
 
 to reproduce
-  let energy_to_offspring energy - min-energy-after-reprod - reproduction-cost
+  let energy_to_offspring energy - energy-after-reprod - reproduction-cost
   let parent-body-size body-size
-  set energy min-energy-after-reprod
+  set energy energy-after-reprod
   set realized-maturity-age age
 
   repeat fecundity
@@ -548,7 +497,7 @@ to reproduce
 
       ; BODY-SIZE SCALING TRAITS (but not allometrically
       set energy-to-reproduce random-normal [energy-to-reproduce] of myself ([energy-to-reproduce] of myself * mutation-size-etr)
-      set min-energy-after-reprod random-normal [min-energy-after-reprod] of myself ([min-energy-after-reprod] of myself * mutation-size-mear)
+      set energy-after-reprod random-normal [energy-after-reprod] of myself ([energy-after-reprod] of myself * mutation-size-ear)
 
       set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
       set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
@@ -557,7 +506,7 @@ to reproduce
       set lineage-identity who
 
       set standardized-etr energy-to-reproduce / (body-size )
-      set standardized-mear min-energy-after-reprod / (body-size)
+      set standardized-ear energy-after-reprod / (body-size)
 
       set color scale-color yellow energy 0 (body-size)
       set size (body-size / 100)
@@ -633,7 +582,6 @@ to forage ;forage by going to the best cell available, or just disperse when all
     ]
   ]
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 599
@@ -765,10 +713,10 @@ count turtles
 11
 
 PLOT
-320
-208
-597
-427
+383
+172
+584
+321
 mean body-size
 NIL
 NIL
@@ -783,10 +731,10 @@ PENS
 "mean" 1.0 0 -16777216 true "let mean-bs mean [body-size] of turtles" "plot mean [body-size] of turtles"
 
 PLOT
-243
-784
-441
-934
+399
+626
+597
+776
 mean fecundity
 NIL
 NIL
@@ -813,10 +761,10 @@ count patches with [pcolor = green]
 11
 
 PLOT
--2
-608
-198
-758
+179
+172
+379
+322
 Number of organisms
 NIL
 NIL
@@ -831,10 +779,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles"
 
 PLOT
-1
-1063
-201
-1213
+-4
+626
+196
+776
 mean maturity-age
 NIL
 NIL
@@ -849,10 +797,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [maturity-age] of turtles"
 
 PLOT
-206
-915
-406
-1065
+198
+626
+398
+776
 mean dispersal ability
 NIL
 NIL
@@ -884,52 +832,16 @@ true
 PENS
 "mean" 1.0 0 -16777216 true "" "plot mean [age] of turtles"
 
-PLOT
-1358
-602
-1558
-752
-histogram of body sizes
-body size value
-NIL
-1.0
-1000.0
-0.0
-10.0
-true
-false
-"set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
-PENS
-"default" 1.0 0 -16777216 true "" "histogram [body-size] of turtles"
-
 SWITCH
-1509
-368
-1757
-401
+1746
+304
+1994
+337
 patch-color-scales-with-resources?
 patch-color-scales-with-resources?
 1
 1
 -1000
-
-PLOT
-1548
-443
-1748
-593
-histogram of fecundity
-fecundity
-NIL
-0.0
-100.0
-0.0
-10.0
-true
-false
-"set-plot-pen-mode 1\nset-plot-pen-interval 1" ""
-PENS
-"default" 1.0 0 -16777216 true "" "histogram [fecundity] of turtles"
 
 SLIDER
 1929
@@ -1046,10 +958,10 @@ NIL
 HORIZONTAL
 
 PLOT
--2
-910
-198
-1060
+179
+474
+379
+624
 mean energy
 NIL
 NIL
@@ -1065,10 +977,10 @@ PENS
 "pen-1" 1.0 0 -7500403 true "" "plot min [energy] of turtles"
 
 PLOT
--2
-759
-198
-909
+179
+323
+379
+473
 total resources
 NIL
 NIL
@@ -1083,10 +995,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
 
 PLOT
-321
-427
-597
-625
+383
+322
+583
+472
 body-size histogram
 NIL
 NIL
@@ -1129,7 +1041,7 @@ direct-event-frequency
 direct-event-frequency
 0
 1
-0.05
+1.0
 0.01
 1
 NIL
@@ -1155,7 +1067,7 @@ direct-event-amplitude
 direct-event-amplitude
 0.01
 1
-1.0
+0.03
 0.01
 1
 NIL
@@ -1226,7 +1138,7 @@ direct-event-coverage
 direct-event-coverage
 0
 1
-0.25
+1.0
 0.01
 1
 NIL
@@ -1241,7 +1153,7 @@ direct-event-clustering
 direct-event-clustering
 0
 1
-0.93
+0.01
 0.01
 1
 NIL
@@ -1468,7 +1380,7 @@ INPUTBOX
 719
 2163
 779
-starting-ratio-min-energy-after-reprod
+starting-ratio-energy-after-reprod
 0.33
 1
 0
@@ -1480,7 +1392,7 @@ INPUTBOX
 1961
 133
 starting-no
-100.0
+1000.0
 1
 0
 Number
@@ -1725,17 +1637,6 @@ mutation-size-maturity-age
 NIL
 HORIZONTAL
 
-INPUTBOX
-638
-845
-824
-980
-snapshot-at
-0\n50000\n51000\n52000\n100000\n101000\n102000\n103000
-1
-1
-String
-
 SLIDER
 2271
 359
@@ -1752,10 +1653,10 @@ NIL
 HORIZONTAL
 
 PLOT
-811
-836
-1011
-986
+804
+692
+1004
+842
 specialization for resource type 1
 NIL
 NIL
@@ -1770,10 +1671,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [item 0 habitat-spec] of turtles"
 
 SWITCH
-1461
-782
-1564
-815
+2267
+454
+2370
+487
 gamma?
 gamma?
 1
@@ -1785,8 +1686,8 @@ SLIDER
 294
 2442
 327
-mutation-size-mear
-mutation-size-mear
+mutation-size-ear
+mutation-size-ear
 0
 1
 0.0
@@ -1811,11 +1712,11 @@ NIL
 HORIZONTAL
 
 PLOT
-702
-988
-902
-1138
-mear
+602
+692
+802
+842
+ear
 NIL
 NIL
 0.0
@@ -1826,13 +1727,13 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [standardized-mear] of turtles"
+"default" 1.0 0 -16777216 true "" "plot mean [standardized-ear] of turtles"
 
 PLOT
-429
-834
-629
-984
+399
+777
+599
+927
 etr
 NIL
 NIL
@@ -1847,10 +1748,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [standardized-etr] of turtles"
 
 PLOT
-641
-721
-841
-871
+383
+471
+583
+621
 total energy
 NIL
 NIL
@@ -1866,9 +1767,9 @@ PENS
 
 PLOT
 1117
-716
+698
 1317
-866
+848
 histogram of energy
 NIL
 NIL
@@ -2235,7 +2136,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
