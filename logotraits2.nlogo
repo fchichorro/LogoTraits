@@ -1,5 +1,4 @@
-extensions[ csv ]
-
+extensions[ csv profiler ]
 
 globals[
   ; LANDSCAPE GENERATION
@@ -93,6 +92,7 @@ to setup
   generate-map
   set ongoing-indirect-perturbation? false
   ;initialize patches
+
   ask patches [
     set resources starting-resources
     set max-resources starting-max-resources
@@ -149,7 +149,6 @@ to setup
     set standardized-ear energy-after-reprod / (body-size)
     set standardized-etr energy-to-reproduce / (body-size)
   ]
-
 end
 
 
@@ -861,7 +860,7 @@ SWITCH
 300
 random-walk?
 random-walk?
-1
+0
 1
 -1000
 
@@ -1399,7 +1398,7 @@ INPUTBOX
 2256
 182
 starting-max-resources
-4.0
+3.0
 1
 0
 Number
@@ -1778,6 +1777,74 @@ forage?
 1
 1
 -1000
+
+BUTTON
+1108
+613
+1210
+646
+NIL
+profiler:start
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1109
+646
+1209
+679
+NIL
+profiler:stop
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1211
+613
+1315
+646
+NIL
+profiler:reset
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1210
+646
+1349
+679
+NIL
+print profiler:report
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
