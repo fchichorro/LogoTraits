@@ -1571,7 +1571,7 @@ mutation-size-body-size
 mutation-size-body-size
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -2126,7 +2126,7 @@ NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="local_optima" repetitions="20" runMetricsEveryStep="false">
+  <experiment name="local_optima" repetitions="15" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="50000"/>
@@ -2212,7 +2212,6 @@ NetLogo 6.0.3
     </enumeratedValueSet>
     <enumeratedValueSet variable="num-of-seeds-per-type">
       <value value="1"/>
-      <value value="50"/>
       <value value="500"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="starting-basal-resource-intake">
@@ -2293,6 +2292,7 @@ NetLogo 6.0.3
     </enumeratedValueSet>
     <enumeratedValueSet variable="mutation-size-dispersal-ability">
       <value value="0"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="starting-resources">
       <value value="2"/>
