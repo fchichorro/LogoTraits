@@ -644,7 +644,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-51.0
+1.0
 10
 1
 NIL
@@ -2126,10 +2126,11 @@ NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment" repetitions="2" runMetricsEveryStep="true">
+  <experiment name="local_optima" repetitions="20" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
-    <timeLimit steps="1000"/>
+    <timeLimit steps="50000"/>
+    <exitCondition>count turtles = 0</exitCondition>
     <metric>count turtles</metric>
     <metric>count [resources] of patches</metric>
     <metric>sum [energy] of turtles</metric>
@@ -2141,9 +2142,6 @@ NetLogo 6.0.3
     <metric>mean [standardized-etr] of turtles</metric>
     <enumeratedValueSet variable="indirect-event?">
       <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="resource-perception-radius">
-      <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="patch-n-pixels">
       <value value="15"/>
@@ -2180,6 +2178,7 @@ NetLogo 6.0.3
     </enumeratedValueSet>
     <enumeratedValueSet variable="mutation-size-ear">
       <value value="0"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="maturity-longevity-coefficient">
       <value value="4"/>
@@ -2197,7 +2196,7 @@ NetLogo 6.0.3
       <value value="1000"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="direct-event?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="starting-basal-homeostasis-cost-per-tick">
       <value value="0.02"/>
@@ -2212,7 +2211,9 @@ NetLogo 6.0.3
       <value value="&quot;1,1&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="num-of-seeds-per-type">
-      <value value="51"/>
+      <value value="1"/>
+      <value value="50"/>
+      <value value="500"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="starting-basal-resource-intake">
       <value value="0.1"/>
@@ -2282,6 +2283,7 @@ NetLogo 6.0.3
     </enumeratedValueSet>
     <enumeratedValueSet variable="mutation-size-etr">
       <value value="0"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="indirect-event-coverage">
       <value value="0.7"/>
@@ -2296,16 +2298,19 @@ NetLogo 6.0.3
       <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="mutation-size-body-size">
+      <value value="0"/>
       <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="mutation-size-fecundity">
       <value value="0"/>
+      <value value="0.1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="mutation-size-interbirth-interval">
       <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="mutation-size-maturity-age">
       <value value="0"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
