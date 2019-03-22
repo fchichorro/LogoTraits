@@ -411,7 +411,7 @@ to-report get-mean-energy-incomes
   ;calculate the energy income of a patch
   let mean-energy-income 0
   let num-patches 0
-  ask [patches in-radius disp-ability] of myself [
+  ask patches in-radius disp-ability [
     ifelse resources > [basal-resource-intake] of myself
     [
       ;multiply basal-resource intake by the habitat spec value
@@ -843,21 +843,6 @@ patch-color-scales-with-resources?
 1
 -1000
 
-SLIDER
-1929
-783
-2129
-816
-resource-perception-radius
-resource-perception-radius
-0
-5
-2.0
-1
-1
-NIL
-HORIZONTAL
-
 SWITCH
 1745
 72
@@ -881,10 +866,10 @@ random-walk?
 -1000
 
 BUTTON
-1513
-404
-1613
-437
+1581
+330
+1681
+363
 reset patch colors
 reset-patch-colors
 NIL
@@ -1054,7 +1039,7 @@ SWITCH
 470
 direct-event?
 direct-event?
-0
+1
 1
 -1000
 
@@ -2140,6 +2125,190 @@ NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="2" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="1000"/>
+    <metric>count turtles</metric>
+    <metric>count [resources] of patches</metric>
+    <metric>sum [energy] of turtles</metric>
+    <metric>mean [energy] of turtles</metric>
+    <metric>mean [maturity-age] of turtles</metric>
+    <metric>mean [disp-ability] of turtles</metric>
+    <metric>mean [fecundity] of turtles</metric>
+    <metric>mean [standardized-ear] of turtles</metric>
+    <metric>mean [standardized-etr] of turtles</metric>
+    <enumeratedValueSet variable="indirect-event?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resource-perception-radius">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="patch-n-pixels">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gamma?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random-walk?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stand-dev-to-body-size">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-age">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="min-ycor">
+      <value value="-16"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="metabolic-allometric-exponent">
+      <value value="0.75"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-clustering">
+      <value value="0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="min-xcor">
+      <value value="-16"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-disp-ability">
+      <value value="1.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-basal-growth-cost-per-tick">
+      <value value="0.02"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-ear">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="maturity-longevity-coefficient">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-amplitude">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="forage?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="num-of-patch-types">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-no">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-basal-homeostasis-cost-per-tick">
+      <value value="0.02"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-clustering">
+      <value value="0.088"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-resource-regen">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-disp-stage">
+      <value value="&quot;1,1&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="num-of-seeds-per-type">
+      <value value="51"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-basal-resource-intake">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-habitat-spec">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-sexual?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="patch-color-scales-with-resources?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-ratio-energy-after-reprod">
+      <value value="0.33"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-habitat-spec">
+      <value value="&quot;1,0,0,0&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-energy">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-interbirth-interval">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-coverage">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-amplitude">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-ratio-energy-to-reproduce">
+      <value value="0.67"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-basal-dispersal-cost-per-unit">
+      <value value="0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-body-size">
+      <value value="30"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-maturity-age">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-fecundity">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="reproductive-cost">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-ycor">
+      <value value="16"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="big-move-first?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="direct-event-frequency">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-xcor">
+      <value value="16"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-frequency">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-etr">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="indirect-event-coverage">
+      <value value="0.7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-max-resources">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-dispersal-ability">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="starting-resources">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-body-size">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-fecundity">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-interbirth-interval">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation-size-maturity-age">
+      <value value="0"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
