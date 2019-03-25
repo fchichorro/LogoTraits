@@ -410,23 +410,26 @@ to-report get-mean-energy-incomes
   ;calculate the energy income of a patch
   let mean-energy-income 0
   let num-patches 0
-  ask patches in-radius disp-ability [
-    ifelse resources > [basal-resource-intake] of myself
-    [
-      ;multiply basal-resource intake by the habitat spec value
-      set mean-energy-income mean-energy-income + [basal-resource-intake] of myself *
-      item resource-type [habitat-spec] of myself
-      set num-patches num-patches + 1
+  let patches-around patches in-radius disp-ability
+  if any? patches-around[
+    ask patches-around [
+      ifelse resources > [basal-resource-intake] of myself
+      [
+        ;multiply basal-resource intake by the habitat spec value
+        set mean-energy-income mean-energy-income + [basal-resource-intake] of myself *
+        item resource-type [habitat-spec] of myself
+        set num-patches num-patches + 1
 
+      ]
+      [
+        set mean-energy-income mean-energy-income + ([basal-resource-intake] of myself +
+          (resources - [basal-resource-intake] of myself) ) *
+        item resource-type [habitat-spec] of myself
+        set num-patches num-patches + 1
+      ]
     ]
-    [
-      set mean-energy-income mean-energy-income + ([basal-resource-intake] of myself +
-      (resources - [basal-resource-intake] of myself) ) *
-      item resource-type [habitat-spec] of myself
-      set num-patches num-patches + 1
-    ]
+    set mean-energy-income mean-energy-income / num-patches
   ]
-  set mean-energy-income mean-energy-income / num-patches
   report mean-energy-income
 end
 
@@ -860,7 +863,7 @@ SWITCH
 300
 random-walk?
 random-walk?
-0
+1
 1
 -1000
 
@@ -1570,7 +1573,7 @@ mutation-size-body-size
 mutation-size-body-size
 0
 1
-0.0
+0.05
 0.01
 1
 NIL
@@ -2188,7 +2191,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
