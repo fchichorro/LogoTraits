@@ -321,7 +321,8 @@ end
 
 to agents-go-bigger-first
   ;foreach sort-on [-1 * body-size + random-float 1 + random-float -1] turtles
-  foreach sort-on [-1 * random-normal body-size (body-size * stand-dev-to-body-size)] turtles
+  ;foreach sort-on [-1 * random-normal body-size (body-size * stand-dev-to-body-size)] turtles
+  foreach sort-on [-1 * random-normal energy (energy * stand-dev-to-body-size)] turtles
   [ the-turtle -> ask the-turtle [
     agents-go
     ]
