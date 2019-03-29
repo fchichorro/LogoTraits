@@ -320,9 +320,8 @@ to regen-resources
 end
 
 to agents-go-bigger-first
-  ;foreach sort-on [-1 * body-size + random-float 1 + random-float -1] turtles
   ;foreach sort-on [-1 * random-normal body-size (body-size * stand-dev-to-body-size)] turtles
-  foreach sort-on [-1 * random-normal energy (energy * stand-dev-to-body-size)] turtles
+  foreach sort-on [-1 * random-normal energy ((abs energy) * stand-dev-to-body-size)] turtles
   [ the-turtle -> ask the-turtle [
     agents-go
     ]
@@ -647,7 +646,7 @@ num-of-seeds-per-type
 num-of-seeds-per-type
 1
 (world-width * world-height) / num-of-patch-types
-1.0
+500.0
 10
 1
 NIL
@@ -939,7 +938,7 @@ mutation-size-fecundity
 mutation-size-fecundity
 0
 5
-0.0
+0.1
 0.01
 1
 NIL
@@ -1402,7 +1401,7 @@ INPUTBOX
 2256
 182
 starting-max-resources
-3.0
+4.0
 1
 0
 Number
@@ -1589,7 +1588,7 @@ mutation-size-dispersal-ability
 mutation-size-dispersal-ability
 0
 1
-0.0
+0.05
 0.01
 1
 NIL
@@ -1619,7 +1618,7 @@ mutation-size-maturity-age
 mutation-size-maturity-age
 0
 1
-0.0
+0.05
 0.01
 1
 NIL
@@ -1678,7 +1677,7 @@ mutation-size-ear
 mutation-size-ear
 0
 1
-0.0
+0.05
 0.01
 1
 NIL
@@ -1693,7 +1692,7 @@ mutation-size-etr
 mutation-size-etr
 0
 1
-0.0
+0.05
 0.01
 1
 NIL
@@ -2192,12 +2191,12 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="local_optima" repetitions="15" runMetricsEveryStep="false">
+  <experiment name="local_optima" repetitions="10" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="50000"/>
