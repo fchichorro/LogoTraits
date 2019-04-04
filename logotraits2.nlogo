@@ -32,6 +32,7 @@ turtles-own[
   disp-ability
   disp-stage
 
+
   ; NON-FOCAL TRAITS
   energy
   age
@@ -39,6 +40,8 @@ turtles-own[
   basal-growth-cost-per-tick
   basal-homeostasis-cost-per-tick
   basal-resource-intake
+  ratio-etr
+  ratio-ear
   energy-to-reproduce
   energy-after-reprod
   ticks-since-last-reproduction
@@ -136,8 +139,10 @@ to setup
     set basal-resource-intake starting-basal-resource-intake * (body-size ^ metabolic-allometric-exponent)
 
     ; BODY-SIZE SCALING TRAITS (but not allometrically
-    set energy-to-reproduce starting-ratio-energy-to-reproduce * (body-size ^ metabolic-allometric-exponent)
-    set energy-after-reprod starting-ratio-energy-after-reprod * (body-size ^ metabolic-allometric-exponent)
+    set ratio-etr starting-ratio-energy-to-reproduce
+    set ratio-ear starting-ratio-energy-after-reprod
+    set energy-to-reproduce ratio-etr * (body-size ^ metabolic-allometric-exponent)
+    set energy-after-reprod ratio-ear * (body-size ^ metabolic-allometric-exponent)
     set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
     set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
 
@@ -498,8 +503,11 @@ to reproduce
       set basal-resource-intake starting-basal-resource-intake * (body-size ^ metabolic-allometric-exponent)
 
       ; BODY-SIZE SCALING TRAITS (but not allometrically
-      set energy-to-reproduce random-normal [energy-to-reproduce] of myself ([energy-to-reproduce] of myself * mutation-size-etr)
-      set energy-after-reprod random-normal [energy-after-reprod] of myself ([energy-after-reprod] of myself * mutation-size-ear)
+      set ratio-etr random-normal [ratio-etr] of myself ([ratio-etr] of myself * mutation-size-etr)
+      set ratio-ear random-normal [ratio-ear] of myself ([ratio-ear] of myself * mutation-size-ear)
+
+      set energy-to-reproduce ratio-etr * (body-size ^ metabolic-allometric-exponent)
+      set energy-after-reprod ratio-ear * (body-size ^ metabolic-allometric-exponent)
 
       set ticks-since-last-reproduction 0 ; high value so that organisms automatically reproduce when they can the first time ; now it~s low value
       set reproduction-cost reproductive-cost * (body-size ^ metabolic-allometric-exponent)
@@ -507,7 +515,7 @@ to reproduce
       ; STATS AND VISUALIZATION
       set lineage-identity who
 
-      set standardized-etr energy-to-reproduce / (body-size )
+      set standardized-etr energy-to-reproduce / (body-size)
       set standardized-ear energy-after-reprod / (body-size)
 
       set color scale-color yellow energy 0 (body-size)
@@ -1603,7 +1611,7 @@ mutation-size-interbirth-interval
 mutation-size-interbirth-interval
 0
 1
-0.0
+0.05
 0.01
 1
 NIL
@@ -1677,7 +1685,7 @@ mutation-size-ear
 mutation-size-ear
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -1692,7 +1700,7 @@ mutation-size-etr
 mutation-size-etr
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -2191,7 +2199,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
