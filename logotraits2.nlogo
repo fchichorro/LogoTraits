@@ -197,6 +197,19 @@ to go
   update-perturbations
 
   tick
+  if ticks = indirect-event-start
+  [
+    set indirect-event? true
+  ]
+  if ticks = direct-event-start
+  [
+    set direct-event? true
+  ]
+  if ticks = stop-at-ticks
+  [
+    stop
+  ]
+
 end
 
 to update-patch-resources
@@ -325,8 +338,8 @@ to regen-resources
 end
 
 to agents-go-bigger-first
-  ;foreach sort-on [-1 * random-normal body-size (body-size * stand-dev-to-body-size)] turtles
-  foreach sort-on [-1 * random-normal energy ((abs energy) * stand-dev-to-body-size)] turtles
+  foreach sort-on [-1 * random-normal body-size (body-size * stand-dev-to-body-size)] turtles
+  ;foreach sort-on [-1 * random-normal energy ((abs energy) * stand-dev-to-body-size)] turtles
   [ the-turtle -> ask the-turtle [
     agents-go
     ]
@@ -465,7 +478,7 @@ to disperse
   ]
   [
     let disp-distance random disp-ability
-    set heading random 360
+    set heading random 180 - random 180
     fd disp-distance
     set energy energy - (basal-dispersal-cost-per-unit * disp-distance)
   ]
@@ -588,7 +601,10 @@ to forage ;forage by going to the best cell available, or just disperse when all
   [
     if potential-income-of-new-patch - potential-dispersal-cost > potential-income-of-this-patch and energy > potential-dispersal-cost [
       face p
-      move-to p
+      set heading round random-normal heading (360 * heading-error-rate)
+      let travel random-normal potential-dispersal-distance (potential-dispersal-distance * travel-error-rate)
+      fd travel
+      set energy energy - (travel * basal-dispersal-cost-per-unit)
     ]
   ]
 end
@@ -757,7 +773,6 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [fecundity] of turtles"
-"pen-1" 1.0 0 -7500403 true "" "plot median [fecundity] of turtles"
 
 MONITOR
 1406
@@ -946,7 +961,7 @@ mutation-size-fecundity
 mutation-size-fecundity
 0
 5
-0.1
+0.0
 0.01
 1
 NIL
@@ -1211,7 +1226,7 @@ INPUTBOX
 2065
 500
 starting-body-size
-30.0
+75.0
 1
 0
 Number
@@ -1244,7 +1259,7 @@ INPUTBOX
 1874
 500
 starting-maturity-age
-40.0
+25.0
 1
 0
 Number
@@ -1266,7 +1281,7 @@ INPUTBOX
 2089
 439
 starting-disp-ability
-1.2
+2.0
 1
 0
 Number
@@ -1611,7 +1626,7 @@ mutation-size-interbirth-interval
 mutation-size-interbirth-interval
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -1626,7 +1641,7 @@ mutation-size-maturity-age
 mutation-size-maturity-age
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -1785,7 +1800,7 @@ SWITCH
 300
 forage?
 forage?
-1
+0
 1
 -1000
 
@@ -1856,6 +1871,69 @@ NIL
 NIL
 NIL
 1
+
+INPUTBOX
+1383
+640
+1538
+700
+stop-at-ticks
+15000.0
+1
+0
+Number
+
+INPUTBOX
+1383
+700
+1538
+760
+indirect-event-start
+5000.0
+1
+0
+Number
+
+INPUTBOX
+1383
+760
+1538
+820
+direct-event-start
+0.0
+1
+0
+Number
+
+SLIDER
+1984
+266
+2156
+299
+heading-error-rate
+heading-error-rate
+0
+1
+0.05
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+2002
+301
+2174
+334
+travel-error-rate
+travel-error-rate
+0
+1
+0.3
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
