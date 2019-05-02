@@ -428,7 +428,7 @@ to-report get-mean-energy-incomes
   ;calculate the energy income of a patch
   let mean-energy-income 0
   let num-patches 0
-  let patches-around patches in-radius disp-ability
+  let patches-around patches in-radius (disp-ability + 1) ;when disp ability is <1 it may find no patches around, hence the +1 to avoid an error
   if any? patches-around[
     ask patches-around [
       ifelse resources > [basal-resource-intake] of myself
@@ -477,7 +477,7 @@ to disperse
     ;do nothing if this stage is non-disperser
   ]
   [
-    let disp-distance random disp-ability
+    let disp-distance random (disp-ability + 1)
     set heading random 180 - random 180
     fd disp-distance
     set energy energy - (basal-dispersal-cost-per-unit * disp-distance)
@@ -586,7 +586,7 @@ to reset-patch-colors
 end
 
 to forage ;forage by going to the best cell available, or just disperse when all cells around have no resources
-  let p max-one-of patches in-radius disp-ability [resources]
+  let p max-one-of patches in-radius (disp-ability + 1) [resources]
   let potential-income-of-this-patch  get-energy-income patch-here
   let potential-income-of-new-patch get-energy-income p
 
