@@ -428,7 +428,7 @@ to-report get-mean-energy-incomes
   ;calculate the energy income of a patch
   let mean-energy-income 0
   let num-patches 0
-  let patches-around patches in-radius (disp-ability + 1) ;when disp ability is <1 it may find no patches around, hence the +1 to avoid an error
+  let patches-around patches in-radius (disp-ability) ;when disp ability is <1 it may find no patches around, hence the +1 to avoid an error
   if any? patches-around[
     ask patches-around [
       ifelse resources > [basal-resource-intake] of myself
@@ -477,10 +477,11 @@ to disperse
     ;do nothing if this stage is non-disperser
   ]
   [
-    let disp-distance random (disp-ability + 1)
-    set heading random 180 - random 180
+    let disp-distance random disp-ability
+    ;let disp-distance 1
+    set heading heading + random 180 - random 180
     fd disp-distance
-    set energy energy - (basal-dispersal-cost-per-unit * disp-distance)
+    set energy energy - basal-dispersal-cost-per-unit * (disp-distance ^ travel-penalty)
   ]
 end
 
@@ -586,25 +587,51 @@ to reset-patch-colors
 end
 
 to forage ;forage by going to the best cell available, or just disperse when all cells around have no resources
-  let p max-one-of patches in-radius (disp-ability + 1) [resources]
+  let patches-in-radius patches in-radius disp-ability
+  ask patch-here[
+    set patches-in-radius other patches-in-radius ;eliminate patch-here from patches-in-radius
+  ]
+
+  ;let nr-detected-patches round (detection-ability * (count patches-in-radius))
+  ;let nr-detected-patches detection-ability * (count patches-in-radius)
+  let nr-detected-patches count patches-in-radius ;for debuging, does not make sense otherwise
+
+  let detected-patches n-of nr-detected-patches patches-in-radius
+  ;if ticks = 2000 [
+    ;type "nr detected: " print nr-detected-patches            ;debugging purposes
+    ;type "nr actual detected: " print count detected-patches  ;debugging purposes
+  ;]
+
   let potential-income-of-this-patch  get-energy-income patch-here
-  let potential-income-of-new-patch get-energy-income p
 
-  let potential-dispersal-distance distance p
-  let potential-dispersal-cost potential-dispersal-distance * basal-dispersal-cost-per-unit
+  ifelse any? detected-patches [ ;if there are patches in radius
 
-  ifelse potential-income-of-this-patch = 0  and potential-income-of-new-patch = 0 ;move even if it hurts energy if there is no possible outcome in the cells around
+    let best-patch  max-one-of detected-patches [resources - ([basal-dispersal-cost-per-unit] of myself * distance myself ^ travel-penalty)]
+    ;let best-patch  max-one-of detected-patches [resources]
+    let worst-patch min-one-of detected-patches [resources]
+
+    let potential-income-of-new-patch get-energy-income best-patch
+
+    let potential-dispersal-distance distance best-patch
+    let potential-dispersal-cost basal-dispersal-cost-per-unit * (potential-dispersal-distance ^ travel-penalty)
+
+    ifelse potential-income-of-this-patch = 0  and potential-income-of-new-patch = 0 ;move even if it hurts energy if there is no possible outcome in the cells around
     [
       disperse
+    ]
+    ;else
+    [
+      if potential-income-of-new-patch - potential-dispersal-cost > potential-income-of-this-patch and energy > potential-dispersal-cost [
+        face best-patch
+        move-to best-patch
+        set energy energy - potential-dispersal-cost
+      ]
+    ]
   ]
   ;else
   [
-    if potential-income-of-new-patch - potential-dispersal-cost > potential-income-of-this-patch and energy > potential-dispersal-cost [
-      face p
-      set heading round random-normal heading (360 * heading-error-rate)
-      let travel random-normal potential-dispersal-distance (potential-dispersal-distance * travel-error-rate)
-      fd travel
-      set energy energy - (travel * basal-dispersal-cost-per-unit)
+    if potential-income-of-this-patch < basal-homeostasis-cost-per-tick + basal-dispersal-cost-per-unit * (disp-ability ^ travel-penalty) [
+      disperse
     ]
   ]
 end
@@ -739,10 +766,10 @@ count turtles
 11
 
 PLOT
-383
-172
-584
-321
+397
+176
+598
+325
 mean body-size
 NIL
 NIL
@@ -786,10 +813,10 @@ count patches with [pcolor = green]
 11
 
 PLOT
-179
-172
-379
-322
+198
+176
+398
+326
 Number of organisms
 NIL
 NIL
@@ -832,12 +859,13 @@ NIL
 0.0
 10.0
 0.0
-10.0
+5.0
 true
 false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [disp-ability] of turtles"
+"pen-1" 1.0 0 -7500403 true "" "plot min [disp-ability] of turtles"
 
 PLOT
 1121
@@ -864,7 +892,7 @@ SWITCH
 337
 patch-color-scales-with-resources?
 patch-color-scales-with-resources?
-1
+0
 1
 -1000
 
@@ -968,10 +996,10 @@ NIL
 HORIZONTAL
 
 PLOT
-179
-474
-379
-624
+198
+476
+398
+626
 mean energy
 NIL
 NIL
@@ -987,10 +1015,10 @@ PENS
 "pen-1" 1.0 0 -7500403 true "" "plot min [energy] of turtles"
 
 PLOT
-179
-323
-379
-473
+198
+326
+398
+476
 total resources
 NIL
 NIL
@@ -1005,10 +1033,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of patches"
 
 PLOT
-383
-322
-583
-472
+397
+326
+597
+476
 body-size histogram
 NIL
 NIL
@@ -1221,10 +1249,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [realized-interbirth-interval] of turtles"
 
 INPUTBOX
-1975
-440
-2065
-500
+1961
+502
+2051
+562
 starting-body-size
 75.0
 1
@@ -1232,10 +1260,10 @@ starting-body-size
 Number
 
 INPUTBOX
-2068
-441
-2195
-501
+2054
+503
+2181
+563
 starting-interbirth-interval
 10.0
 1
@@ -1243,10 +1271,10 @@ starting-interbirth-interval
 Number
 
 INPUTBOX
-1878
-440
-1973
-500
+1864
+502
+1959
+562
 starting-fecundity
 1.0
 1
@@ -1254,10 +1282,10 @@ starting-fecundity
 Number
 
 INPUTBOX
-1758
-440
-1874
-500
+1744
+502
+1860
+562
 starting-maturity-age
 25.0
 1
@@ -1265,10 +1293,10 @@ starting-maturity-age
 Number
 
 INPUTBOX
-1860
-379
-1987
-439
+1846
+441
+1973
+501
 starting-habitat-spec
 1,0,0,0
 1
@@ -1276,21 +1304,21 @@ starting-habitat-spec
 String
 
 INPUTBOX
-1990
-379
-2089
-439
+1976
+441
+2075
+501
 starting-disp-ability
-2.0
+3.0
 1
 0
 Number
 
 INPUTBOX
-1758
-379
-1858
-439
+1744
+441
+1844
+501
 starting-disp-stage
 1,1
 1
@@ -1298,10 +1326,10 @@ starting-disp-stage
 String
 
 SWITCH
-1758
-501
-1902
-534
+1744
+563
+1888
+596
 starting-sexual?
 starting-sexual?
 1
@@ -1309,10 +1337,10 @@ starting-sexual?
 -1000
 
 INPUTBOX
-2008
-587
-2095
-647
+1994
+649
+2081
+709
 starting-energy
 0.2
 1
@@ -1320,10 +1348,10 @@ starting-energy
 Number
 
 INPUTBOX
-2008
-526
-2163
-586
+1994
+588
+2149
+648
 starting-age
 5.0
 1
@@ -1331,10 +1359,10 @@ starting-age
 Number
 
 INPUTBOX
-1761
-617
-1860
-677
+1747
+679
+1846
+739
 starting-basal-dispersal-cost-per-unit
 0.01
 1
@@ -1342,10 +1370,10 @@ starting-basal-dispersal-cost-per-unit
 Number
 
 INPUTBOX
-1761
-678
-1874
-738
+1747
+740
+1860
+800
 starting-basal-growth-cost-per-tick
 0.02
 1
@@ -1353,10 +1381,10 @@ starting-basal-growth-cost-per-tick
 Number
 
 INPUTBOX
-1761
-557
-1895
-617
+1747
+619
+1881
+679
 starting-basal-homeostasis-cost-per-tick
 0.02
 1
@@ -1364,10 +1392,10 @@ starting-basal-homeostasis-cost-per-tick
 Number
 
 INPUTBOX
-1761
-739
-1881
-799
+1747
+801
+1867
+861
 starting-basal-resource-intake
 0.1
 1
@@ -1375,10 +1403,10 @@ starting-basal-resource-intake
 Number
 
 INPUTBOX
-2008
-659
-2172
-719
+1994
+721
+2158
+781
 starting-ratio-energy-to-reproduce
 0.67
 1
@@ -1386,10 +1414,10 @@ starting-ratio-energy-to-reproduce
 Number
 
 INPUTBOX
-2008
-719
-2163
-779
+1994
+781
+2149
+841
 starting-ratio-energy-after-reprod
 0.33
 1
@@ -1548,40 +1576,40 @@ Patches
 1
 
 TEXTBOX
-1766
-347
-1916
-365
+1752
+409
+1902
+427
 ORGANISM TRAITS\t\n
 11
 0.0
 1
 
 TEXTBOX
-1767
-363
-1917
-381
+1753
+425
+1903
+443
 focal traits
 11
 0.0
 1
 
 TEXTBOX
-2026
-510
-2176
-528
+2012
+572
+2162
+590
 starting age and energy
 11
 0.0
 1
 
 TEXTBOX
-1763
-540
-1931
-568
+1749
+602
+1917
+630
 energy expenditure and uptake
 11
 0.0
@@ -1596,7 +1624,7 @@ mutation-size-body-size
 mutation-size-body-size
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -1758,10 +1786,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [standardized-etr] of turtles"
 
 PLOT
-383
-471
-583
-621
+397
+475
+597
+625
 total energy
 NIL
 NIL
@@ -1878,7 +1906,7 @@ INPUTBOX
 1538
 700
 stop-at-ticks
-15000.0
+0.0
 1
 0
 Number
@@ -1889,7 +1917,7 @@ INPUTBOX
 1538
 760
 indirect-event-start
-5000.0
+0.0
 1
 0
 Number
@@ -1906,34 +1934,85 @@ direct-event-start
 Number
 
 SLIDER
-1984
-266
-2156
-299
-heading-error-rate
-heading-error-rate
-0
+2002
+335
+2174
+368
+travel-penalty
+travel-penalty
+0.001
 1
-0.05
+0.011
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-2002
-301
-2174
-334
-travel-error-rate
-travel-error-rate
+2004
+375
+2176
+408
+detection-ability
+detection-ability
 0
 1
-0.3
+0.8
 0.01
 1
 NIL
 HORIZONTAL
+
+PLOT
+702
+857
+902
+1007
+histogram of disp ability
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"set-plot-pen-mode 1\nset-plot-pen-interval 0.1" ""
+PENS
+"default" 1.0 0 -16777216 true "" "histogram [disp-ability] of turtles"
+
+MONITOR
+930
+859
+1099
+904
+NIL
+mean [disp-ability] of turtles
+17
+1
+11
+
+MONITOR
+930
+904
+1087
+949
+NIL
+min [disp-ability] of turtles
+17
+1
+11
+
+MONITOR
+930
+949
+1092
+994
+NIL
+max [disp-ability] of turtles
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
