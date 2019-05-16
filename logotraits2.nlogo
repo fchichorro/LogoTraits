@@ -592,9 +592,12 @@ to forage ;forage by going to the best cell available, or just disperse when all
     set patches-in-radius other patches-in-radius ;eliminate patch-here from patches-in-radius
   ]
 
-  ;let nr-detected-patches round (detection-ability * (count patches-in-radius))
+  let nr-detected-patches floor (detection-ability * (count patches-in-radius))
+
+  if (detection-ability * count patches-in-radius) - nr-detected-patches > random-float 1
+  [ set nr-detected-patches nr-detected-patches + 1]
   ;let nr-detected-patches detection-ability * (count patches-in-radius)
-  let nr-detected-patches count patches-in-radius ;for debuging, does not make sense otherwise
+  ;let nr-detected-patches count patches-in-radius ;for debuging, does not make sense otherwise
 
   let detected-patches n-of nr-detected-patches patches-in-radius
   ;if ticks = 2000 [
@@ -2356,7 +2359,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
