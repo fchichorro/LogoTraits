@@ -1,18 +1,9 @@
 extensions[ csv profiler ]
 
 globals[
-  ; LANDSCAPE GENERATION
-  ; num-of-seeds-per-type
-  ; num-of-patch-types
+
     patch-palette                  ; the colours of the patches
 
-  ; PATCHES
-  ; PATCHES PARAMETERS
-  ;
-
-
-  ; in test
-  ;mortality-rate
   ongoing-indirect-perturbation?
 
   ; STATS
@@ -36,10 +27,10 @@ turtles-own[
   ; NON-FOCAL TRAITS
   energy
   age
-  basal-dispersal-cost-per-unit
-  basal-growth-cost-per-tick
-  basal-homeostasis-cost-per-tick
-  basal-resource-intake
+  dispersal-cost
+  growth-cost
+  homeostasis-cost
+  max-resource-intake
   ratio-etr
   ratio-ear
   energy-to-reproduce
@@ -133,10 +124,10 @@ to setup
     set age starting-age
 
     ; * BODY-SIZE ^ allometric-constant TRAITS
-    set basal-dispersal-cost-per-unit starting-basal-dispersal-cost-per-unit * (body-size ^ metabolic-allometric-exponent)
-    set basal-growth-cost-per-tick starting-basal-growth-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
-    set basal-homeostasis-cost-per-tick starting-basal-homeostasis-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
-    set basal-resource-intake starting-basal-resource-intake * (body-size ^ metabolic-allometric-exponent)
+    set dispersal-cost dispersal-cost-coef * (body-size ^ metabolic-allometric-exponent)
+    set growth-cost dispersal-cost-coef * (body-size ^ metabolic-allometric-exponent)
+    set homeostasis-cost homeostasis-cost-coef * (body-size ^ metabolic-allometric-exponent)
+    set max-resource-intake max-resource-intake-coef * (body-size ^ metabolic-allometric-exponent)
 
     ; BODY-SIZE SCALING TRAITS (but not allometrically
     set ratio-etr starting-ratio-energy-to-reproduce
@@ -387,9 +378,9 @@ to agents-go
   ]
   ;else
   [
-    set energy energy - basal-growth-cost-per-tick
+    set energy energy - growth-cost
   ]
-  set energy energy - basal-homeostasis-cost-per-tick
+  set energy energy - homeostasis-cost
   set ticks-since-last-reproduction ticks-since-last-reproduction + 1
   set age age + 1
 
@@ -404,18 +395,18 @@ to eat
   ;
   let energy-income 0
   ask patch-here [
-    ifelse resources > [basal-resource-intake] of myself
+    ifelse resources > [max-resource-intake] of myself
     [
       ;multiply basal-resource intake by the habitat spec value
-      set energy-income [basal-resource-intake] of myself *
+      set energy-income [max-resource-intake] of myself *
       item resource-type [habitat-spec] of myself
-      ;set resources resources - [basal-resource-intake] of myself
+      ;set resources resources - [max-resource-intake] of myself
       set resources resources - energy-income
 
     ]
     [
-      set energy-income ([basal-resource-intake] of myself +
-      (resources - [basal-resource-intake] of myself) ) *
+      set energy-income ([max-resource-intake] of myself +
+      (resources - [max-resource-intake] of myself) ) *
       item resource-type [habitat-spec] of myself
       set resources 0
     ]
@@ -431,17 +422,17 @@ to-report get-mean-energy-incomes
   let patches-around patches in-radius (disp-ability) ;when disp ability is <1 it may find no patches around, hence the +1 to avoid an error
   if any? patches-around[
     ask patches-around [
-      ifelse resources > [basal-resource-intake] of myself
+      ifelse resources > [max-resource-intake] of myself
       [
         ;multiply basal-resource intake by the habitat spec value
-        set mean-energy-income mean-energy-income + [basal-resource-intake] of myself *
+        set mean-energy-income mean-energy-income + [max-resource-intake] of myself *
         item resource-type [habitat-spec] of myself
         set num-patches num-patches + 1
 
       ]
       [
-        set mean-energy-income mean-energy-income + ([basal-resource-intake] of myself +
-          (resources - [basal-resource-intake] of myself) ) *
+        set mean-energy-income mean-energy-income + ([max-resource-intake] of myself +
+          (resources - [max-resource-intake] of myself) ) *
         item resource-type [habitat-spec] of myself
         set num-patches num-patches + 1
       ]
@@ -455,15 +446,15 @@ to-report get-energy-income [ptch]
   ;get energy income if agent eats in current patch
   let energy-income 0
   ask ptch [
-    ifelse resources > [basal-resource-intake] of myself
+    ifelse resources > [max-resource-intake] of myself
     [
       ;multiply basal-resource intake by the habitat spec value
-      set energy-income [basal-resource-intake] of myself *
+      set energy-income [max-resource-intake] of myself *
       item resource-type [habitat-spec] of myself
     ]
     [
-      set energy-income ([basal-resource-intake] of myself +
-      (resources - [basal-resource-intake] of myself) ) *
+      set energy-income ([max-resource-intake] of myself +
+      (resources - [max-resource-intake] of myself) ) *
       item resource-type [habitat-spec] of myself
     ]
   ]
@@ -481,7 +472,7 @@ to disperse
     ;let disp-distance 1
     set heading heading + random 180 - random 180
     fd disp-distance
-    set energy energy - basal-dispersal-cost-per-unit * (disp-distance ^ travel-penalty)
+    set energy energy - dispersal-cost * (disp-distance ^ travel-penalty)
   ]
 end
 
@@ -511,10 +502,10 @@ to reproduce
       ;set climate-sd
 
       ; * BODY-SIZE ^ allometric-constant TRAITS
-      set basal-dispersal-cost-per-unit starting-basal-dispersal-cost-per-unit * (body-size ^ metabolic-allometric-exponent)
-      set basal-growth-cost-per-tick starting-basal-growth-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
-      set basal-homeostasis-cost-per-tick starting-basal-homeostasis-cost-per-tick * (body-size ^ metabolic-allometric-exponent)
-      set basal-resource-intake starting-basal-resource-intake * (body-size ^ metabolic-allometric-exponent)
+      set dispersal-cost dispersal-cost-coef * (body-size ^ metabolic-allometric-exponent)
+      set growth-cost dispersal-cost-coef * (body-size ^ metabolic-allometric-exponent)
+      set homeostasis-cost homeostasis-cost-coef * (body-size ^ metabolic-allometric-exponent)
+      set max-resource-intake max-resource-intake-coef * (body-size ^ metabolic-allometric-exponent)
 
       ; BODY-SIZE SCALING TRAITS (but not allometrically
       set ratio-etr random-normal [ratio-etr] of myself ([ratio-etr] of myself * mutation-size-etr)
@@ -609,14 +600,14 @@ to forage ;forage by going to the best cell available, or just disperse when all
 
   ifelse any? detected-patches [ ;if there are patches in radius
 
-    let best-patch  max-one-of detected-patches [resources - ([basal-dispersal-cost-per-unit] of myself * distance myself ^ travel-penalty)]
+    let best-patch  max-one-of detected-patches [resources - ([dispersal-cost] of myself * distance myself ^ travel-penalty)]
     ;let best-patch  max-one-of detected-patches [resources]
     let worst-patch min-one-of detected-patches [resources]
 
     let potential-income-of-new-patch get-energy-income best-patch
 
     let potential-dispersal-distance distance best-patch
-    let potential-dispersal-cost basal-dispersal-cost-per-unit * (potential-dispersal-distance ^ travel-penalty)
+    let potential-dispersal-cost dispersal-cost * (potential-dispersal-distance ^ travel-penalty)
 
     ifelse potential-income-of-this-patch = 0  and potential-income-of-new-patch = 0 ;move even if it hurts energy if there is no possible outcome in the cells around
     [
@@ -633,7 +624,7 @@ to forage ;forage by going to the best cell available, or just disperse when all
   ]
   ;else
   [
-    if potential-income-of-this-patch < basal-homeostasis-cost-per-tick + basal-dispersal-cost-per-unit * (disp-ability ^ travel-penalty) [
+    if potential-income-of-this-patch < homeostasis-cost + dispersal-cost * (disp-ability ^ travel-penalty) [
       disperse
     ]
   ]
@@ -1366,7 +1357,7 @@ INPUTBOX
 679
 1846
 739
-starting-basal-dispersal-cost-per-unit
+dispersal-cost-coef
 0.01
 1
 0
@@ -1377,7 +1368,7 @@ INPUTBOX
 740
 1860
 800
-starting-basal-growth-cost-per-tick
+growth-cost-coef
 0.02
 1
 0
@@ -1388,7 +1379,7 @@ INPUTBOX
 619
 1881
 679
-starting-basal-homeostasis-cost-per-tick
+homeostasis-cost-coef
 0.02
 1
 0
@@ -1399,7 +1390,7 @@ INPUTBOX
 801
 1867
 861
-starting-basal-resource-intake
+max-resource-intake-coef
 0.1
 1
 0
@@ -2359,7 +2350,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
