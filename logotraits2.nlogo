@@ -930,21 +930,6 @@ NIL
 1
 
 SLIDER
-2268
-388
-2440
-421
-mutation-size
-mutation-size
-0
-0.5
-0.0
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
 1745
 137
 1958
@@ -975,10 +960,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-2267
-421
-2447
-454
+2271
+391
+2451
+424
 mutation-size-fecundity
 mutation-size-fecundity
 0
@@ -1640,10 +1625,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-2271
-229
-2469
-262
+2269
+514
+2467
+547
 mutation-size-interbirth-interval
 mutation-size-interbirth-interval
 0
@@ -1703,10 +1688,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "histogram [item 0 habitat-spec] of turtles"
 
 SWITCH
-2267
-454
-2370
-487
+2271
+455
+2374
+488
 gamma?
 gamma?
 1
@@ -2007,6 +1992,16 @@ max [disp-ability] of turtles
 17
 1
 11
+
+TEXTBOX
+2274
+495
+2424
+513
+deprecated
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -2350,7 +2345,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
